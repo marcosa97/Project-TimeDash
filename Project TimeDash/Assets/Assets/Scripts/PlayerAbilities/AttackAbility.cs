@@ -8,9 +8,6 @@ public class AttackAbility : MonoBehaviour {
 	//Public settings (set in inspector)
 	public float attackTime; //How long an attack should last
 	public float attackDistance; //How far an attack will make a player move (% of the original walking distance)
-	public float sprintAttackTime; //How long a sprint attack should last
-	public float sprintAttackDistance; 
-	public float sprintAttackCooldownTime;
 	 
 	//References we need
 	private float currentLerpTime;
@@ -21,6 +18,8 @@ public class AttackAbility : MonoBehaviour {
 	private AbilitiesHandler abilitiesHandler;
 	private PlayerOrientation playerOrientation;
 	private Animator playerAnimator;
+	private PlayerDirections playerFaceDirection;
+	private bool playerAttacking2;
 
 	private SwordCollider swordCollider;
 	private SwordCollider swordColliderUp;
@@ -50,63 +49,16 @@ public class AttackAbility : MonoBehaviour {
 		                                            ref bool playerSprinting, Vector3 attackDirection) { 
 		switch (attackState) {
 		case AttackState.Ready:
-			//Determine if it's a regular attack or sprint attack
-			if (playerSprinting) {
-				//modify sprint bool so that we can change the animation
-				playerSprinting = false;
-				playerSprAttacking = true;
-				attackState = AttackState.SprintAttacking;
-				attackTimer = sprintAttackTime;
-				startPosition = transform.position;
-				currentLerpTime = 0f;
-				Debug.Log ("SPRINT ATTACK!");
-			} else {
-				attackState = AttackState.Attacking;
-				attackTimer = attackTime;
-			}
+			//Setup attack
+			attackState = AttackState.Attacking;
+			attackTimer = attackTime;
 
-			//NOTE: will have to make a different function for dash attack colliders
 			//Determines which animation to play and which collider to enable
-			DetermineAttackDirection (playerOrientation.GetDirection (attackDirection));
-			break;
-
-		
-		case AttackState.SprintAttacking:
-			//This state is when the player was sprinting and attacked
-			attackTimer -= Time.deltaTime;
-
-			//move towards attack direction
-			playerBody.velocity = Vector2.zero; //Stop player from moving while attacking
-			//transform.position = Vector3.MoveTowards (transform.position, attackDirection, sprintAttackDistance * Time.deltaTime);
-			//float t = 
-
-			currentLerpTime += Time.deltaTime;
-			if (currentLerpTime > sprintAttackTime)
-				currentLerpTime = sprintAttackTime;
-
-			float t = currentLerpTime / sprintAttackTime;
-			t = Mathf.Sin (t * Mathf.PI * 0.5f);
-			transform.position = Vector2.Lerp (startPosition, attackDirection, t);
-
-			if (attackTimer <= 0f) {
-				attackState = AttackState.SprintAttackCooldown;
-
-				//Clear list of targets that were hit
-				swordCollider.AttackHasEnded ();
-				swordColliderUp.AttackHasEnded ();
-				swordColliderLeft.AttackHasEnded ();
-				swordColliderRight.AttackHasEnded ();
-
-				//Disable colliders
-				swordCollider.Disable();
-				swordColliderUp.Disable ();
-				swordColliderLeft.Disable ();
-				swordColliderRight.Disable ();
-
-				//Cooldown time for dash attack
-				attackTimer = sprintAttackCooldownTime;
-			}
-
+			playerFaceDirection = playerOrientation.GetDirection (attackDirection);
+			//DetermineAttackDirection (playerOrientation.GetDirection (attackDirection));
+			DetermineAttackDirection (playerFaceDirection);
+			playerAttacking = true;
+			playerAttacking2 = true;
 			break;
 
 
@@ -119,7 +71,7 @@ public class AttackAbility : MonoBehaviour {
 			transform.position = Vector3.MoveTowards (transform.position, attackDirection, attackDistance * Time.deltaTime);
 
 			//Set attacking animation
-			playerAttacking = true;
+			//playerAttacking = true;
 
 			if (attackTimer <= 0f) {
 				attackState = AttackState.Done;
@@ -144,23 +96,12 @@ public class AttackAbility : MonoBehaviour {
 			}
 			break;
 
-		case AttackState.SprintAttackCooldown:
-			attackTimer -= Time.deltaTime;
-
-			if (attackTimer <= 0f) {
-				//Reset stuff
-				attackTimer = 0f;
-				attackState = AttackState.Ready;
-				playerState = PlayerState.Default;
-				playerSprAttacking = false;
-			}
-
-			break;
-
 
 		case AttackState.Done:
 			//NOTE: Will need to have the animation continue to play during this state. During this state, the sword is 
 			//      no longer swinging, but this state can be interrupted by another attack -> combo
+			playerAttacking = false;
+			playerAttacking2 = false;
 
 			if (abilitiesHandler.comboMaxReached () && !abilitiesHandler.isCooldownTimerUp ()) {
 				//stay in this state, let it cool down
@@ -177,7 +118,7 @@ public class AttackAbility : MonoBehaviour {
 	}
 		
 	//Determines what direction to face when attacking and enables the corresponding collider
-	void DetermineAttackDirection(PlayerDirections playerDirections) {
+	private void DetermineAttackDirection(PlayerDirections playerDirections) {
 		switch (playerDirections) {
 		case PlayerDirections.RightUp:
 			Debug.Log ("RIGHT UP");
@@ -218,17 +159,19 @@ public class AttackAbility : MonoBehaviour {
 		playerAnimator.SetInteger ("PlayerAttackDirection", (int)playerDirections);
 	}
 
-	Vector2 CreateAttackVector(Vector2 attackDirection) {
-		
-		return attackDirection;
+	//=================GETTER FUNCTIONS===================
+	public bool GetPlayerAttacking() {
+		return playerAttacking2;
+	}
+
+	public int GetAttackDirection() {
+		return (int) playerFaceDirection;
 	}
 
 }
 
 public enum AttackState {
 	Ready,
-	SprintAttacking,
 	Attacking,
-	SprintAttackCooldown,
 	Done
 }

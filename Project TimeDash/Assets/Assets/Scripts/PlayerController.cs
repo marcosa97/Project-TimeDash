@@ -40,6 +40,7 @@ public class PlayerController : MonoBehaviour {
 
 	//Structures that handle each ability's logic
 	//Set to private when done debugging
+	private AbilityBasicMovement basicMovement;
 	public AbilitiesHandler abilitiesHandler;
 	public DashAbility dashAbility;
 	public AttackAbility attackAbility;
@@ -53,6 +54,7 @@ public class PlayerController : MonoBehaviour {
 		//moveSpeed = walkSpeed;
 		anim = GetComponent<Animator> ();
 		playerBody = GetComponent<Rigidbody2D> ();
+		basicMovement = GetComponent<AbilityBasicMovement> ();
 		attackAbility = GetComponent<AttackAbility> ();
 		shieldAbility = GetComponent<AbilityShield> ();
 		dodgeAbility = GetComponent<AbilityDodgeRoll> ();
@@ -79,6 +81,7 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		//Starting state for player
+		//playerState = PlayerState.Default;
 		playerState = PlayerState.Default;
 	}
 	
@@ -94,7 +97,7 @@ public class PlayerController : MonoBehaviour {
 		float moveHorizontal = (Input.GetAxis ("Horizontal")) * acceleration;
 		float moveVertical = (Input.GetAxis ("Vertical")) * acceleration;
 
-		Sprint ();
+		Sprint (ref moveHorizontal, ref moveVertical);
 		
 		//Move the Player according to raw input
 		//if (moveHorizontal > 0.5f || moveHorizontal < -0.5f || moveVertical > 0.5f || moveVertical < -0.5f) {
@@ -116,14 +119,26 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	//Makes player move faster if LEFT SHIFT / X is held down
-	void Sprint() {
+	void Sprint(ref float moveHorizontal, ref float moveVertical) {
+		Vector2 directionNormalized;
+
 		if (Input.GetButton ("SprintPS4")) {
-			//Debug.Log ("SPRINTING");
-			moveSpeed = sprintSpeed;
-			playerSprinting = true;
+			//If player is not moving, don't activate sprinting bool
+			if (moveHorizontal == 0f && moveVertical == 0f) {
+				playerSprinting = false;
+			} else {
+				//This is so that sprint speed is always the same
+				directionNormalized = new Vector2 (moveHorizontal, moveVertical);
+				directionNormalized.Normalize ();
+				moveHorizontal = directionNormalized.x;
+				moveVertical = directionNormalized.y;
+				//Debug.Log ("SPRINTING");
+				moveSpeed = sprintSpeed;
+				playerSprinting = true;
+			}
 		} else {
 			moveSpeed = walkSpeed;
-			//playerSprinting = false;
+			playerSprinting = false;
 		}
 			
 	}
@@ -158,6 +173,8 @@ public class PlayerController : MonoBehaviour {
 		abilitiesHandler.HandleTimers();
 
 		switch (playerState) {
+
+		/*
 		case PlayerState.Default:
 			//A function should go here that checks whether a certain state is available?
 			if (controllerPref == ControllerPreference.KeyboardMouse)
@@ -167,6 +184,15 @@ public class PlayerController : MonoBehaviour {
 			
 			MovePlayer ();
 			break;
+		*/
+
+		case PlayerState.Default:
+			basicMovement.Idle (ref playerState);
+			break;
+
+		case PlayerState.Moving:
+			basicMovement.Move(ref playerState);
+			break;
 
 		case PlayerState.Dashing:
 			//Note: Normalize first Dash because Player may be accelerating or slowing down, causing shorter dashes
@@ -175,11 +201,11 @@ public class PlayerController : MonoBehaviour {
 
 		case PlayerState.Attacking:
 			attackAbility.Attack(ref playerState, ref playerAttacking, ref playerSprintAttacking, 
-				                 ref playerSprinting, attackDirection); 
+				ref playerSprinting, basicMovement.GetAttackDirection() ); 
 			break;
 
 		case PlayerState.SprintAttacking:
-			sprintAttackAbility.SprintAttack (ref playerState, attackDirection);
+			sprintAttackAbility.SprintAttack (ref playerState, basicMovement.GetAttackDirection() );
 			break;
 
 		case PlayerState.Shielding:
@@ -204,13 +230,13 @@ public class PlayerController : MonoBehaviour {
 		} //switch
 
 		//Let the animator know what just happened in this frame (like which way the player was facing
-		anim.SetFloat ("MoveX", lastMove.x);
-		anim.SetFloat ("MoveY", lastMove.y);
-		anim.SetBool ("PlayerMoving", playerMoving);
-		anim.SetFloat ("LastMoveX", lastMove.x);
-		anim.SetFloat ("LastMoveY", lastMove.y);
+		anim.SetFloat ("MoveX", basicMovement.GetLastMove().x);
+		anim.SetFloat ("MoveY", basicMovement.GetLastMove().y);
+		anim.SetBool ("PlayerMoving", basicMovement.GetPlayerMoving() );
+		anim.SetFloat ("LastMoveX", basicMovement.GetLastMove().x );
+		anim.SetFloat ("LastMoveY", basicMovement.GetLastMove().y );
 		anim.SetBool ("PlayerDashing", playerDashing);
-		anim.SetBool ("PlayerAttacking", playerAttacking);
+		anim.SetBool ("PlayerAttacking", attackAbility.GetPlayerAttacking() );
 		//anim.SetBool ("PlayerSprinting", playerSprinting);
 
 		//anim.SetInteger ("PlayerAttackDirection", (int)playerDirection);
@@ -325,6 +351,7 @@ public class PlayerController : MonoBehaviour {
 //State Machine for player
 public enum PlayerState {
 	Default, 
+	Moving,
 	Dashing,
 	Attacking,
 	SprintAttacking,
