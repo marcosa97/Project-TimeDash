@@ -16,7 +16,7 @@ public class PlayerStartPoint : MonoBehaviour {
 		player = FindObjectOfType<PlayerController>();
 		//Make player position the same position as the Start Point
 		player.transform.position = transform.position;
-		player.lastMove = startDirection;
+		///////player.lastMove = startDirection;
 
 		camera = FindObjectOfType<CameraController> ();
 		camera.transform.position = new Vector3 (transform.position.x, transform.position.y,

@@ -51,8 +51,8 @@ public class DashAbility : MonoBehaviour {
 			dashTimer = dashTime; //How long the dash lasts
 
 			//Keep track of last move made so the animator knows which way to make the player face
-			playerController.lastMove.x = moveDirection.x;
-			playerController.lastMove.y = moveDirection.y;
+			///////playerController.lastMove.x = moveDirection.x;
+			///////playerController.lastMove.y = moveDirection.y;
 
 			//If Dash Chain hasn't been activated
 			/*

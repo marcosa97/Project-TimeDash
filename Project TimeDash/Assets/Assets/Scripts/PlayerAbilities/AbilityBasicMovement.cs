@@ -17,12 +17,13 @@ public class AbilityBasicMovement : MonoBehaviour {
 	public float walkSpeed;   //Set in inspector
 	public float sprintSpeed; //Set in inspector
 	public float acceleration;
+	public float chargeAttackTimeWindow;
 
 	//References and variables neded
+	private float timer;
 	private float moveSpeed;
 	private MoveState moveState;
 	private Rigidbody2D playerBody;
-	private AbilitiesHandler abilitiesHandler; //Get rid of this eventually
 
 	private Vector2 lastMove;
 	private Vector2 attackDirection; //used when an attack happens
@@ -32,19 +33,17 @@ public class AbilityBasicMovement : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		playerBody = GetComponent<Rigidbody2D> ();
-		abilitiesHandler = GetComponent<AbilitiesHandler> ();
-
 	}
 
 	public void Idle(ref PlayerState playerState) {
 		//Set player velocity to 0? Probably no need to do so
 
 		//Get Input
-		//GetControllerInput(ref playerState);
 		MovePlayer();
 		if (playerMoving) {
 			playerState = PlayerState.Moving; //change to chargeAttackTime when implemented
-			moveState = MoveState.Moving;
+			moveState = MoveState.ChargeAttackTimeWindow;
+			timer = chargeAttackTimeWindow;
 		}
 
 		GetControllerInput(ref playerState);
@@ -56,6 +55,23 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 		switch (moveState) {
 		case MoveState.ChargeAttackTimeWindow:
+			timer -= Time.deltaTime;
+
+			//If player presses attack right after moving, do charged attack
+			if (Input.GetButtonDown("AttackPS4")) {
+				//Reset stuff and switch states
+				timer = 0f;
+				playerState = PlayerState.ChargedAttacking;
+				lastMove.Normalize ();
+				attackDirection = new Vector3 (transform.position.x + lastMove.x, transform.position.y + lastMove.y);
+				break;
+			}
+
+			//If timer is up, it means that the charged attack wasn't initiated
+			if (timer <= 0f) {
+				timer = 0f;
+				moveState = MoveState.Moving;
+			}
 
 			break;
 
@@ -127,10 +143,12 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 	}
 
+	//==================INPUT FUNCTIONS================================
 
 	//FOR PS4 CONTROLLER
 	//Handles all inputs other than player movement
 	private void GetControllerInput(ref PlayerState playerState) {
+		/*
 		//If player pressed Dash button and player is moving
 		if (Input.GetKeyDown (KeyCode.Space) && (!playerBody.velocity.Equals (Vector2.zero))) {
 			//If cool down is done, allow dashing again
@@ -140,27 +158,25 @@ public class AbilityBasicMovement : MonoBehaviour {
 			} else
 				playerState = PlayerState.Default;
 		}
-		// Handle mouse button inputs for attacks -> 0 is left click, 1 is right, 2 is middle
-		else if (Input.GetButtonDown ("AttackPS4")) {
-			//playerAttacking = true;
-			if (abilitiesHandler.isAttackAvailable ()) {
-				//Attack in direction player is facing
-				//NOTE: Multiplied by 10 so that the player moves far enough when attacking
-				lastMove.Normalize ();
-				//Change attack distance depending on which move is executed
-				if (!playerSprinting) {
-					attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
-						transform.position.y + lastMove.y * 10f);
+		*/
+		//Switch to Attack State
+		if (Input.GetButtonDown ("AttackPS4")) {
+			//Attack in direction player is facing
+			//NOTE: Multiplied by 10 so that the player moves far enough when attacking
+			lastMove.Normalize ();
+			//Change attack distance depending on which move is executed
+			if (!playerSprinting) {
+				attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
+					transform.position.y + lastMove.y * 10f);
 
-					playerState = PlayerState.Attacking;
-				} else {
-					attackDirection = new Vector3 (transform.position.x + lastMove.x,
-						transform.position.y + lastMove.y);
+				playerState = PlayerState.Attacking;
+			} else {
+				attackDirection = new Vector3 (transform.position.x + lastMove.x,
+					transform.position.y + lastMove.y);
 
-					playerState = PlayerState.SprintAttacking;
-				}
-
+				playerState = PlayerState.SprintAttacking;
 			}
+				
 		}
 		//Handle shielding 
 		else if (Input.GetButton ("ShieldPS4")) {
@@ -173,6 +189,36 @@ public class AbilityBasicMovement : MonoBehaviour {
 		//Handle Sonic Attack (V or LEFT SHIFT button)
 	}
 
+	/*
+	//This is where I am going to have to separate Keyboard+Mouse and Controller inputs
+	//Handles all inputs other than player movement
+	private void GetKeyboardInput(ref PlayerState playerState) {
+		//If player pressed Dash button and player is moving
+		if (Input.GetKeyDown (KeyCode.Space) && (!playerBody.velocity.Equals (Vector2.zero))) {
+			//If cool down is done, allow dashing again
+			// i.e., if state is available (no cooldown active), then allow state switch
+			if (abilitiesHandler.isDashAvailable ()) {
+				playerState = PlayerState.Dashing;
+			} else
+				playerState = PlayerState.Default;
+		}
+		// Handle mouse button inputs for attacks -> 0 is left click, 1 is right, 2 is middle
+		else if (Input.GetButtonDown("Attack")) {
+			//playerAttacking = true;
+			if (abilitiesHandler.isAttackAvailable()) {
+				attackDirection = GetMousePositionVector ();
+				playerState = PlayerState.Attacking;
+
+			}
+		}
+		//Handle input for Hyper Dash -> Right mouse click
+		else if (Input.GetMouseButtonDown(1)) {
+			playerState = PlayerState.HyperDashing;
+		}
+		//Handle Sonic Attack (V or LEFT SHIFT button)
+	}
+	*/
+
 	//================GETTER FUNCTIONS=================
 	public Vector2 GetAttackDirection() {
 		return attackDirection;
@@ -184,6 +230,27 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 	public bool GetPlayerMoving() {
 		return playerMoving;
+	}
+
+	public void UpdateLastMove(Vector2 newLastMove) {
+		lastMove = newLastMove;
+	}
+
+	//Gets the position of where the mouse is in the world
+	//Currently used by:
+	//  Attack Ability
+	//  HyperDash Ability
+	public Vector3 GetMousePositionVector() {
+		Vector3 target;
+
+		//Vector3 implicitly converted to Vector2
+		target = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		target.z = transform.position.z;
+
+		//target.Normalize();
+		//transform.position = Vector2.MoveTowards (transform.position, target, 10 * Time.deltaTime);
+		Debug.Log("Target: " + target);
+		return target;
 	}
 
 }

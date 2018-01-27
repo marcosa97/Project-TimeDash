@@ -86,7 +86,7 @@ public class AbilityHyperDash : MonoBehaviour {
 				//timeManager.DoSlowMotion();
 			} else {
 				//Let player move while in slow motion
-				playerController.MovePlayer ();
+				//playerController.MovePlayer ();
 				//Let player pick attack positions
 				PickHyperDashPositions (attackDirection, ref playerState);
 			}
@@ -124,7 +124,7 @@ public class AbilityHyperDash : MonoBehaviour {
 			timer -= Time.unscaledDeltaTime;
 
 			timeManager.DeactivateSlowMotion ();
-			playerController.MovePlayer ();
+			//playerController.MovePlayer ();
 
 			//If Hyper Dashes aren't done, move on to next attack
 			if (positionsToDashTo.Count != 0) {

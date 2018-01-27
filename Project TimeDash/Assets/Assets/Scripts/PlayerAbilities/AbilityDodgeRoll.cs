@@ -18,12 +18,12 @@ public class AbilityDodgeRoll : MonoBehaviour {
 	//References and variables needed
 	public float dodgeTimer;
 	private bool playerDodging;
-	private Rigidbody2D playerBody;
+	//private Rigidbody2D playerBody;
 	private DodgeState dodgeState;
 
 	// Use this for initialization
 	void Start () {
-		playerBody = GetComponent<Rigidbody2D> ();
+		//playerBody = GetComponent<Rigidbody2D> ();
 	}
 
 	//Performs the DodgeRoll from shielding
@@ -54,8 +54,12 @@ public class AbilityDodgeRoll : MonoBehaviour {
 		//Is this state necessary?
 		case DodgeState.Done:
 			//Reset
+			if (Input.GetButton("ShieldPS4") )
+				playerState = PlayerState.Shielding;
+			else
+				playerState = PlayerState.Default;
+			
 			dodgeState = DodgeState.Setup;
-			playerState = PlayerState.Default;
 			break;
 		}
 

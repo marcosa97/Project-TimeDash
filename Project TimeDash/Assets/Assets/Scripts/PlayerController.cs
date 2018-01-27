@@ -7,10 +7,6 @@ public class PlayerController : MonoBehaviour {
 	public PlayerState playerState; //make private when done debugging
 
 	public ControllerPreference controllerPref;
-	public float walkSpeed;   //Set in inspector
-	public float sprintSpeed; //Set in inspector
-	public float moveSpeed; //Should be set private when done testing speeds
-	public float acceleration;
 
 	//For handling animations
 	private Animator anim;
@@ -21,11 +17,6 @@ public class PlayerController : MonoBehaviour {
 	private bool playerAttacking;
 	private bool playerShielding;
 	private bool playerHyperDashing;
-	public Vector2 lastMove; //public so another script can access it
-	//private PlayerDirections playerDirection; //Direction player faces when attacking
-
-	//For handling collisions
-	private Rigidbody2D playerBody;
 
 	//I MAY HAVE TO MAKE THESE PUBLIC AND THEN GET RID OF THE ONES IN AttackAbility.cs AND USE THESE INSTEAD
 	private SwordCollider swordCollider;
@@ -37,28 +28,29 @@ public class PlayerController : MonoBehaviour {
 	//Static -> all objects that have this script will use this playerExists instance
 	private static bool playerExists;
 	private Vector3 attackDirection; 
+	private Vector2 lastMove;
 
 	//Structures that handle each ability's logic
 	//Set to private when done debugging
 	private AbilityBasicMovement basicMovement;
-	public AbilitiesHandler abilitiesHandler;
-	public DashAbility dashAbility;
-	public AttackAbility attackAbility;
+	//public AbilitiesHandler abilitiesHandler;
+	private DashAbility dashAbility;
+	private AttackAbility attackAbility;
 	private AbilityShield shieldAbility;
 	private AbilityDodgeRoll dodgeAbility;
 	private AbilitySprintAttack sprintAttackAbility;
+	private AbilityChargedAttack chargedAttackAbility;
 	//public AbilityHyperDash abilityHyperDash;
 
 	// Use this for initialization
 	void Start () {
-		//moveSpeed = walkSpeed;
 		anim = GetComponent<Animator> ();
-		playerBody = GetComponent<Rigidbody2D> ();
 		basicMovement = GetComponent<AbilityBasicMovement> ();
 		attackAbility = GetComponent<AttackAbility> ();
 		shieldAbility = GetComponent<AbilityShield> ();
 		dodgeAbility = GetComponent<AbilityDodgeRoll> ();
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
+		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
 		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
 		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
@@ -81,7 +73,6 @@ public class PlayerController : MonoBehaviour {
 		}
 
 		//Starting state for player
-		//playerState = PlayerState.Default;
 		playerState = PlayerState.Default;
 	}
 	
@@ -89,58 +80,6 @@ public class PlayerController : MonoBehaviour {
 	void Update () 
 	{
 		UpdatePlayer ();
-	}
-
-	//Handles player movement from user input
-	public void MovePlayer() {
-		//Get player input
-		float moveHorizontal = (Input.GetAxis ("Horizontal")) * acceleration;
-		float moveVertical = (Input.GetAxis ("Vertical")) * acceleration;
-
-		Sprint (ref moveHorizontal, ref moveVertical);
-		
-		//Move the Player according to raw input
-		//if (moveHorizontal > 0.5f || moveHorizontal < -0.5f || moveVertical > 0.5f || moveVertical < -0.5f) {
-		if (moveHorizontal > 0f || moveHorizontal < -0f || moveVertical > 0f || moveVertical < -0f) {
-			//Move player
-			Mathf.Clamp (moveVertical, 0f, 1f);
-			Mathf.Clamp (moveHorizontal, 0f, 1f);
-			playerBody.velocity = new Vector2 (moveHorizontal * moveSpeed, moveVertical * moveSpeed);
-
-			playerMoving = true;
-			lastMove = new Vector2 (moveHorizontal, moveVertical);
-		}
-
-		//Stop the player from moving when velocity is 0
-		if ((moveHorizontal < 0.1f && moveHorizontal > -0.1f) || (moveVertical < 0.1F && moveVertical > -0.1f)) {
-			playerBody.velocity = new Vector2 (moveHorizontal * moveSpeed, moveVertical * moveSpeed);
-		}
-			
-	}
-
-	//Makes player move faster if LEFT SHIFT / X is held down
-	void Sprint(ref float moveHorizontal, ref float moveVertical) {
-		Vector2 directionNormalized;
-
-		if (Input.GetButton ("SprintPS4")) {
-			//If player is not moving, don't activate sprinting bool
-			if (moveHorizontal == 0f && moveVertical == 0f) {
-				playerSprinting = false;
-			} else {
-				//This is so that sprint speed is always the same
-				directionNormalized = new Vector2 (moveHorizontal, moveVertical);
-				directionNormalized.Normalize ();
-				moveHorizontal = directionNormalized.x;
-				moveVertical = directionNormalized.y;
-				//Debug.Log ("SPRINTING");
-				moveSpeed = sprintSpeed;
-				playerSprinting = true;
-			}
-		} else {
-			moveSpeed = walkSpeed;
-			playerSprinting = false;
-		}
-			
 	}
 
 	//===========UNUSED================
@@ -170,7 +109,7 @@ public class PlayerController : MonoBehaviour {
 
 		//Switch Design: Make each Ability class/state take in the playerState
 		//  and modify it only when that Ablity action is done executing
-		abilitiesHandler.HandleTimers();
+		//abilitiesHandler.HandleTimers();
 
 		switch (playerState) {
 
@@ -196,12 +135,15 @@ public class PlayerController : MonoBehaviour {
 
 		case PlayerState.Dashing:
 			//Note: Normalize first Dash because Player may be accelerating or slowing down, causing shorter dashes
-			dashAbility.Dash (lastMove.normalized, ref playerState, ref playerDashing);
+			dashAbility.Dash (basicMovement.GetLastMove().normalized, ref playerState, ref playerDashing);
 			break;
 
 		case PlayerState.Attacking:
-			attackAbility.Attack(ref playerState, ref playerAttacking, ref playerSprintAttacking, 
-				ref playerSprinting, basicMovement.GetAttackDirection() ); 
+			attackAbility.Attack(ref playerState, basicMovement.GetAttackDirection() ); 
+			break;
+
+		case PlayerState.ChargedAttacking:
+			chargedAttackAbility.ChargeAttack (ref playerState, basicMovement.GetAttackDirection ());
 			break;
 
 		case PlayerState.SprintAttacking:
@@ -222,7 +164,7 @@ public class PlayerController : MonoBehaviour {
 
 		case PlayerState.HyperDashing:
 			//if (abilityHyperDash.hyperDashingActive)
-			attackDirection = GetMousePositionVector ();
+			////////attackDirection = GetMousePositionVector ();
 			//abilityHyperDash.HyperDash (ref playerState, ref hyperDashCoolDownTimer, ref playerHyperDashing, attackDirection,
 			//	                        moveHorizontal, moveVertical);
 			break;
@@ -237,101 +179,12 @@ public class PlayerController : MonoBehaviour {
 		anim.SetFloat ("LastMoveY", basicMovement.GetLastMove().y );
 		anim.SetBool ("PlayerDashing", playerDashing);
 		anim.SetBool ("PlayerAttacking", attackAbility.GetPlayerAttacking() );
+		//anim.SetInteger ("PlayerAttackDirection", (int)playerDirections);
 		//anim.SetBool ("PlayerSprinting", playerSprinting);
 
 		//anim.SetInteger ("PlayerAttackDirection", (int)playerDirection);
 	}
-
-	//This is where I am going to have to separate Keyboard+Mouse and Controller inputs
-	//Handles all inputs other than player movement
-	void GetKeyboardInput() {
-		//If player pressed Dash button and player is moving
-		if (Input.GetKeyDown (KeyCode.Space) && (!playerBody.velocity.Equals (Vector2.zero))) {
-			//If cool down is done, allow dashing again
-			// i.e., if state is available (no cooldown active), then allow state switch
-			if (abilitiesHandler.isDashAvailable ()) {
-				playerState = PlayerState.Dashing;
-			} else
-				playerState = PlayerState.Default;
-		}
-		// Handle mouse button inputs for attacks -> 0 is left click, 1 is right, 2 is middle
-		else if (Input.GetButtonDown("Attack")) {
-			//playerAttacking = true;
-			if (abilitiesHandler.isAttackAvailable()) {
-				attackDirection = GetMousePositionVector ();
-				playerState = PlayerState.Attacking;
-
-			}
-		}
-		//Handle input for Hyper Dash -> Right mouse click
-		else if (Input.GetMouseButtonDown(1)) {
-			playerState = PlayerState.HyperDashing;
-		}
-		//Handle Sonic Attack (V or LEFT SHIFT button)
-	}
-
-	//FOR PS4 CONTROLLER
-	//Handles all inputs other than player movement
-	void GetControllerInput() {
-		//If player pressed Dash button and player is moving
-		if (Input.GetKeyDown (KeyCode.Space) && (!playerBody.velocity.Equals (Vector2.zero))) {
-			//If cool down is done, allow dashing again
-			// i.e., if state is available (no cooldown active), then allow state switch
-			if (abilitiesHandler.isDashAvailable ()) {
-				playerState = PlayerState.Dashing;
-			} else
-				playerState = PlayerState.Default;
-		}
-		// Handle mouse button inputs for attacks -> 0 is left click, 1 is right, 2 is middle
-		else if (Input.GetButtonDown ("AttackPS4")) {
-			//playerAttacking = true;
-			if (abilitiesHandler.isAttackAvailable ()) {
-				//Attack in direction player is facing
-				//NOTE: Multiplied by 10 so that the player moves far enough when attacking
-				lastMove.Normalize ();
-				//Change attack distance depending on which move is executed
-				if (!playerSprinting) {
-					attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
-						transform.position.y + lastMove.y * 10f);
-					
-					playerState = PlayerState.Attacking;
-				} else {
-					attackDirection = new Vector3 (transform.position.x + lastMove.x,
-						transform.position.y + lastMove.y);
-					
-					playerState = PlayerState.SprintAttacking;
-				}
-
-			}
-		}
-		//Handle shielding 
-		else if (Input.GetButton ("ShieldPS4")) {
-			playerState = PlayerState.Shielding;
-		}
-		//Handle input for Hyper Dash -> Right mouse click
-		else if (Input.GetMouseButtonDown(1)) {
-			playerState = PlayerState.HyperDashing;
-		}
-		//Handle Sonic Attack (V or LEFT SHIFT button)
-	}
-
-	//Gets the position of where the mouse is in the world
-	//Currently used by:
-	//  Attack Ability
-	//  HyperDash Ability
-	public Vector3 GetMousePositionVector() {
-		Vector3 target;
-
-		//Vector3 implicitly converted to Vector2
-		target = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		target.z = transform.position.z;
-
-		//target.Normalize();
-		//transform.position = Vector2.MoveTowards (transform.position, target, 10 * Time.deltaTime);
-		Debug.Log("Target: " + target);
-		return target;
-	}
-		
+	
 	//Ignores sword collider
 	// @other: the player
 	/*
@@ -354,6 +207,7 @@ public enum PlayerState {
 	Moving,
 	Dashing,
 	Attacking,
+	ChargedAttacking,
 	SprintAttacking,
 	HyperDashing,
 	Shielding,
