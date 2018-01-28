@@ -19,9 +19,9 @@ public class AttackAbility : MonoBehaviour {
 	private Vector2 lastAttackDirection; 
 	private float timer;
 	private Rigidbody2D playerBody; //We need reference so we can move the body
-	private PlayerOrientation playerOrientation;
 	private Animator playerAnimator;
-	private PlayerDirections playerFaceDirection;
+	private EightDirections playerFaceDirection;
+	private OrientationSystem orientationSystem;
 	private AbilityBasicMovement movementInfo;
 	private bool playerAttacking;
 
@@ -38,7 +38,7 @@ public class AttackAbility : MonoBehaviour {
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
 		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
 		playerBody = GetComponent<Rigidbody2D> ();
-		playerOrientation = GetComponent<PlayerOrientation> ();
+		orientationSystem = GetComponent<OrientationSystem> ();
 		playerAnimator = GetComponent<Animator> ();
 		movementInfo = GetComponent<AbilityBasicMovement> ();
 		comboCount = 0;
@@ -57,14 +57,17 @@ public class AttackAbility : MonoBehaviour {
 			timer = attackTime;
 			//Increase combo counter
 			comboCount++; //Use combo count to let animator know which attack is being performed
+			playerAnimator.SetInteger("ComboCount", comboCount);
 
 			//Determines which animation to play and which collider to enable
 			//Set attack animation ID (represented by an int)
 			if (comboCount == 1)
 				lastAttackDirection = attackDirection; 
 			
-			playerFaceDirection = playerOrientation.GetDirection ( CreateAttackVector() );
-			DetermineAttackDirection (playerFaceDirection);
+			//playerFaceDirection = playerOrientation.GetDirection (CreateAttackVector ());
+			playerFaceDirection = orientationSystem.GetDirection (CreateAttackVector ());
+			//DetermineAttackDirection (playerFaceDirection);
+			ActivateCorrespondingCollider (playerFaceDirection);
 			playerAttacking = true;
 			break;
 
@@ -82,7 +85,7 @@ public class AttackAbility : MonoBehaviour {
 
 			if (timer <= 0f) {
 				attackState = AttackState.Done;
-				playerAttacking = false;
+				//playerAttacking = false;
 
 				//Deactivate sword collider
 				//NEED UPDATE: Find a way to only make one call and disable the activated collider
@@ -127,6 +130,7 @@ public class AttackAbility : MonoBehaviour {
 				//Reset stuff
 				comboCount = 0;
 				timer = 0f;
+				playerAttacking = false;
 				attackState = AttackState.Ready;
 				playerState = PlayerState.Default;
 			}
@@ -156,47 +160,47 @@ public class AttackAbility : MonoBehaviour {
 			
 		return v;
 	}
-		
+
 	//Determines what direction to face when attacking and enables the corresponding collider
-	private void DetermineAttackDirection(PlayerDirections playerDirections) {
-		switch (playerDirections) {
-		case PlayerDirections.RightUp:
-			Debug.Log ("RIGHT UP");
+	private void ActivateCorrespondingCollider(EightDirections direction) {
+		switch (direction) {
+		case EightDirections.North:
+			Debug.Log ("North");
 			//Activate RightUp collider and animation
 			swordColliderRight.Enable();
 			break;
-		case PlayerDirections.UpRight:
-			Debug.Log ("UP RIGHT");
+		case EightDirections.NorthEast:
+			Debug.Log ("North East");
 			swordColliderUp.Enable ();
 			break;
-		case PlayerDirections.UpLeft:
-			Debug.Log ("UP LEFT");
+		case EightDirections.East:
+			Debug.Log ("East");
 			swordColliderUp.Enable ();
 			break;
-		case PlayerDirections.LeftUp:
-			Debug.Log ("LEFT UP");
+		case EightDirections.SouthEast:
+			Debug.Log ("South East");
 			swordColliderLeft.Enable ();
 			break;
-		case PlayerDirections.LeftDown:
-			Debug.Log ("LEFT DOWN");
+		case EightDirections.South:
+			Debug.Log ("South");
 			swordColliderLeft.Enable ();
 			break;
-		case PlayerDirections.DownLeft:
-			Debug.Log ("DOWN LEFT");
+		case EightDirections.SouthWest:
+			Debug.Log ("South West");
 			swordCollider.Enable ();
 			break;
-		case PlayerDirections.DownRight:
-			Debug.Log ("DOWN RIGHT");
+		case EightDirections.West:
+			Debug.Log ("West");
 			swordCollider.Enable ();
 			break;
-		case PlayerDirections.RightDown:
-			Debug.Log ("RIGHT DOWN");
+		case EightDirections.NorthWest:
+			Debug.Log ("North West");
 			swordColliderRight.Enable ();
 			break;
 		}
 
 		//Let animator which direction to face
-		playerAnimator.SetInteger ("PlayerAttackDirection", (int)playerDirections);
+		playerAnimator.SetInteger ("PlayerAttackDirection", (int)direction);
 	}
 
 	//=================GETTER FUNCTIONS===================
