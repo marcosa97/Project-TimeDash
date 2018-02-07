@@ -16,7 +16,6 @@ public class PlayerController : MonoBehaviour {
 	private bool playerDashing;
 	private bool playerAttacking;
 	private bool playerShielding;
-	private bool playerHyperDashing;
 
 	//I MAY HAVE TO MAKE THESE PUBLIC AND THEN GET RID OF THE ONES IN AttackAbility.cs AND USE THESE INSTEAD
 	private SwordCollider swordCollider;
@@ -27,13 +26,10 @@ public class PlayerController : MonoBehaviour {
 	//For fixing duplicate Player glitch
 	//Static -> all objects that have this script will use this playerExists instance
 	private static bool playerExists;
-	private Vector3 attackDirection; 
-	private Vector2 lastMove;
 
 	//Structures that handle each ability's logic
 	//Set to private when done debugging
 	private AbilityBasicMovement basicMovement;
-	//public AbilitiesHandler abilitiesHandler;
 	private DashAbility dashAbility;
 	private AttackAbility attackAbility;
 	private AbilityShield shieldAbility;

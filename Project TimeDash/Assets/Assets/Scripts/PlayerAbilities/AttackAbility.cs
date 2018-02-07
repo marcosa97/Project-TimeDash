@@ -165,37 +165,37 @@ public class AttackAbility : MonoBehaviour {
 	private void ActivateCorrespondingCollider(EightDirections direction) {
 		switch (direction) {
 		case EightDirections.North:
-			Debug.Log ("North");
+			//Debug.Log ("North");
 			//Activate RightUp collider and animation
-			swordColliderRight.Enable();
+			swordColliderUp.Enable();
 			break;
 		case EightDirections.NorthEast:
-			Debug.Log ("North East");
-			swordColliderUp.Enable ();
+			//Debug.Log ("North East");
+			//swordColliderUp.Enable ();
 			break;
 		case EightDirections.East:
-			Debug.Log ("East");
-			swordColliderUp.Enable ();
+			//Debug.Log ("East");
+			swordColliderRight.Enable ();
 			break;
 		case EightDirections.SouthEast:
-			Debug.Log ("South East");
-			swordColliderLeft.Enable ();
+			//Debug.Log ("South East");
+			//swordColliderLeft.Enable ();
 			break;
 		case EightDirections.South:
-			Debug.Log ("South");
-			swordColliderLeft.Enable ();
+			//Debug.Log ("South");
+			swordCollider.Enable ();
 			break;
 		case EightDirections.SouthWest:
-			Debug.Log ("South West");
-			swordCollider.Enable ();
+			//Debug.Log ("South West");
+			//swordCollider.Enable ();
 			break;
 		case EightDirections.West:
-			Debug.Log ("West");
-			swordCollider.Enable ();
+			//Debug.Log ("West");
+			swordColliderLeft.Enable ();
 			break;
 		case EightDirections.NorthWest:
-			Debug.Log ("North West");
-			swordColliderRight.Enable ();
+			//Debug.Log ("North West");
+			//swordColliderRight.Enable ();
 			break;
 		}
 
@@ -210,6 +210,13 @@ public class AttackAbility : MonoBehaviour {
 
 	public int GetAttackDirection() {
 		return (int) playerFaceDirection;
+	}
+
+	public Vector2 GetAttackVector() {
+		Vector2 v = lastAttackDirection;
+		lastAttackDirection.x -= transform.position.x;
+		lastAttackDirection.y -= transform.position.y;
+		return v;
 	}
 
 }

@@ -7,12 +7,15 @@ using UnityEngine;
 public class SwordCollider : MonoBehaviour {
 	private List<int> targetsHit; //targets hit in one sword slash
 	private bool attackHasEnded; 
+	private AttackAbility attackScript;
+	private AbilityBasicMovement moveInfo;
 
 	// Use this for initialization
 	void Start () {
 		//swordCollider = GetComponent<Collider2D> ();
 		targetsHit = new List<int> ();
 		attackHasEnded = true;
+		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
 	}
 	
 	// Update is called once per frame
@@ -34,18 +37,27 @@ public class SwordCollider : MonoBehaviour {
 	// @other: could be an enemy, object, or switch
 	void OnTriggerStay2D (Collider2D other) {
 		if (enabled) {
-			if (other.tag == "Enemy") {
+			if (other.tag == "Interactable Object") {
 				//if the enemy that was attacked hasn't already been damaged during this attack
 				if (!targetsHit.Contains (other.gameObject.GetInstanceID ())) {
-					Debug.Log ("TARGET HIT : " + other.gameObject.GetInstanceID ());
+					//Debug.Log ("TARGET HIT : " + other.gameObject.GetInstanceID ());
 
 					//damage the enemy
-					other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
+					//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
+					float force = 150;
+					AttackInfoObject obj = new AttackInfoObject (force, moveInfo.GetLastMove ().normalized);
+					other.SendMessage("ObjectHit", obj );
+
+					//Implement Hit lag here -> Create function that stops the player and the object(s) hit
+					//                          from moving
+					//What is needed for Hit Stop:
+						//Stop animation
+						//Stop player and object movement
 
 					//add enemy to list of enemies already damaged during this attack
 					targetsHit.Add (other.gameObject.GetInstanceID ());
 				}
-
+					
 				//if enemy has already been damaged, then do nothing
 
 			}//if enemy hit
@@ -83,5 +95,26 @@ public class SwordCollider : MonoBehaviour {
 	public void Enable() {
 		enabled = true;
 		attackHasEnded = false;
+	}
+}
+
+//Object
+//Contains the force and direction of an attack
+public class AttackInfoObject {
+//Private
+	private float force; //Attack strength
+	private Vector2 direction; //Direction created from GetAxis
+//Public
+	public AttackInfoObject(float f, Vector2 v) {
+		force = f;
+		direction = v.normalized;
+	}
+
+	public Vector2 GetDirection() {
+		return direction;
+	}
+
+	public float GetForce() {
+		return force;
 	}
 }

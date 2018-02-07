@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 585115d7334fe0946bfe7eea8eb10bd0
-timeCreated: 1517096330
+timeCreated: 1517465410
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -85,8 +85,8 @@ TextureImporter:
         y: 89
         width: 57
         height: 29
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.79889536, y: 0.47445706}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -98,8 +98,8 @@ TextureImporter:
         y: 89
         width: 58
         height: 28
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.20625804, y: 0.55290955}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -111,8 +111,8 @@ TextureImporter:
         y: 72
         width: 40
         height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.77777785, y: 0.5997149}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -124,8 +124,8 @@ TextureImporter:
         y: 73
         width: 52
         height: 47
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5712251, y: 0.3739163}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -137,8 +137,8 @@ TextureImporter:
         y: 26
         width: 46
         height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5161031, y: 0.7314815}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -150,8 +150,8 @@ TextureImporter:
         y: 14
         width: 49
         height: 45
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.33539078}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -163,8 +163,8 @@ TextureImporter:
         y: 14
         width: 65
         height: 43
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.28347567, y: 0.6205856}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -172,12 +172,12 @@ TextureImporter:
       name: Attack 2 Green Sprites_7
       rect:
         serializedVersion: 2
-        x: 217
+        x: 216
         y: 11
         width: 32
         height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.2916665, y: 0.30347687}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0

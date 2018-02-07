@@ -118,6 +118,7 @@ public class EnemyController : MonoBehaviour {
 	//Called when 2 objects with colliders attached to them meet
 	//Other object is going to be Player
 	void OnCollisionEnter2D (Collision2D other) {
+		Debug.Log ("ENTERED SWORD COLLIDER");
 		if (other.gameObject.tag == "Player") {
 			/*
 			//Deactivate player
