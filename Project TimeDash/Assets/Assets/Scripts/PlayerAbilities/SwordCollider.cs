@@ -9,6 +9,9 @@ public class SwordCollider : MonoBehaviour {
 	private bool attackHasEnded; 
 	private AttackAbility attackScript;
 	private AbilityBasicMovement moveInfo;
+	private GameObject obj; //set in inspector
+	private TimeFunctions timeManager;
+	private GameObject hitParticles;
 
 	// Use this for initialization
 	void Start () {
@@ -16,6 +19,9 @@ public class SwordCollider : MonoBehaviour {
 		targetsHit = new List<int> ();
 		attackHasEnded = true;
 		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
+		obj = GameObject.Find ("Time Manager");
+		timeManager = obj.GetComponent<TimeFunctions> ();
+		hitParticles = GameObject.Find ("HitParticles");
 	}
 	
 	// Update is called once per frame
@@ -39,6 +45,7 @@ public class SwordCollider : MonoBehaviour {
 		if (enabled) {
 			if (other.tag == "Interactable Object") {
 				//if the enemy that was attacked hasn't already been damaged during this attack
+				// AKA, Hit Registered
 				if (!targetsHit.Contains (other.gameObject.GetInstanceID ())) {
 					//Debug.Log ("TARGET HIT : " + other.gameObject.GetInstanceID ());
 
@@ -47,6 +54,13 @@ public class SwordCollider : MonoBehaviour {
 					float force = 150;
 					AttackInfoObject obj = new AttackInfoObject (force, moveInfo.GetLastMove ().normalized);
 					other.SendMessage("ObjectHit", obj );
+
+					//Call Time.Timescale using SendMessage or a reference to time manager
+					timeManager.StartCoroutine("HitStop");
+
+					//Instantiate particle effect
+					var effect = Instantiate(hitParticles, other.transform.position, other.transform.rotation);
+					Destroy (effect, .5f);
 
 					//Implement Hit lag here -> Create function that stops the player and the object(s) hit
 					//                          from moving
