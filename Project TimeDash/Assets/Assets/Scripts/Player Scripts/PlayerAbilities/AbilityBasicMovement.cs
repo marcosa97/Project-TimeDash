@@ -232,6 +232,7 @@ public class AbilityBasicMovement : MonoBehaviour {
 		return playerMoving;
 	}
 
+	//To be used by other classes when they update the last move (like Attacks)
 	public void UpdateLastMove(Vector2 newLastMove) {
 		lastMove = newLastMove;
 	}

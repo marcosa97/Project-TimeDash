@@ -12,6 +12,7 @@ public class SwordCollider : MonoBehaviour {
 	private GameObject obj; //set in inspector
 	private TimeFunctions timeManager;
 	private GameObject hitParticles;
+	private PlayerInfoContainer playerInfo;
 
 	// Use this for initialization
 	void Start () {
@@ -19,6 +20,7 @@ public class SwordCollider : MonoBehaviour {
 		targetsHit = new List<int> ();
 		attackHasEnded = true;
 		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
+		playerInfo = GetComponentInParent<PlayerInfoContainer> ();
 		obj = GameObject.Find ("Time Manager");
 		timeManager = obj.GetComponent<TimeFunctions> ();
 		hitParticles = GameObject.Find ("HitParticles");
@@ -52,7 +54,8 @@ public class SwordCollider : MonoBehaviour {
 					//damage the enemy
 					//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
 					float force = 150;
-					AttackInfoObject obj = new AttackInfoObject (force, moveInfo.GetLastMove ().normalized);
+					AttackInfoObject obj = new AttackInfoObject (playerInfo.GetAttackForce(), 
+						                                         moveInfo.GetLastMove ().normalized);
 					other.SendMessage("ObjectHit", obj );
 
 					//Call Time.Timescale using SendMessage or a reference to time manager

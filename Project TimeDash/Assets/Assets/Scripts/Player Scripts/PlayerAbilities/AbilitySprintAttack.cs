@@ -17,6 +17,7 @@ public class AbilitySprintAttack : MonoBehaviour {
 	public float sprintAttackTime;
 	public float sprintAttackDistance;
 	public float sprintAttackCooldownTime;
+	public float attackForce;
 
 	//References and variables needed
 	private float currentLerpTime;
@@ -25,6 +26,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 	private Rigidbody2D playerBody; //We need reference so we can move the body
 	private PlayerOrientation playerOrientation;
 	private Animator playerAnimator;
+	private AttackInfoContainer attackInfo;
+	private PlayerInfoContainer playerInfo;
 
 	//Colliders -> change these once I create new colliders for dashing
 	private SwordCollider swordCollider;
@@ -34,6 +37,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		attackInfo = new AttackInfoContainer (AttackID.SprintAttack, attackForce);
+		playerInfo = GetComponent<PlayerInfoContainer> (); 
 		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
 		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
@@ -56,6 +61,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 			Debug.Log ("SPRINT ATTACK!"); 
 
 			SetColliderAndAnimation (playerOrientation.GetDirection (attackDirection)); 
+			playerInfo.UpdateAttackPerformed (attackInfo.GetAttackID(), attackInfo.GetForce() );
+			playerAnimator.Play ("Sprint Attack");
 			break;
 
 		case AttackState.SprintAttacking:

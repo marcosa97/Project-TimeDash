@@ -17,12 +17,6 @@ public class PlayerController : MonoBehaviour {
 	private bool playerAttacking;
 	private bool playerShielding;
 
-	//I MAY HAVE TO MAKE THESE PUBLIC AND THEN GET RID OF THE ONES IN AttackAbility.cs AND USE THESE INSTEAD
-	private SwordCollider swordCollider;
-	private SwordCollider swordColliderUp;
-	private SwordCollider swordColliderLeft;
-	private SwordCollider swordColliderRight;
-
 	//For fixing duplicate Player glitch
 	//Static -> all objects that have this script will use this playerExists instance
 	private static bool playerExists;
@@ -48,16 +42,6 @@ public class PlayerController : MonoBehaviour {
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
 		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
-		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
-		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
-		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
-		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
-
-		//Disable colliders 
-		swordCollider.Disable();
-		swordColliderUp.Disable ();
-		swordColliderLeft.Disable ();
-		swordColliderRight.Disable ();
 
 		//If Player doesn't exist yet
 		if (!playerExists) {
@@ -123,10 +107,12 @@ public class PlayerController : MonoBehaviour {
 
 		case PlayerState.Default:
 			basicMovement.Idle (ref playerState);
+			anim.Play ("Idle Direction");
 			break;
 
 		case PlayerState.Moving:
-			basicMovement.Move(ref playerState);
+			basicMovement.Move (ref playerState);
+			anim.Play ("Player Movement");
 			break;
 
 		case PlayerState.Dashing:

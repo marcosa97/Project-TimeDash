@@ -11,6 +11,7 @@ public class AttackAbility : MonoBehaviour {
 	public float regularCooldownTime;
 	public float comboCooldownTime;
 	public int comboMax;
+	public int attackForce; //knockback
 	 
 	//References and variables needed
 	private int comboCount;
@@ -24,6 +25,8 @@ public class AttackAbility : MonoBehaviour {
 	private OrientationSystem orientationSystem;
 	private AbilityBasicMovement movementInfo;
 	private bool playerAttacking;
+	private AttackInfoContainer attackInfo;
+	private PlayerInfoContainer playerInfo;
 
 	private SwordCollider swordCollider;
 	private SwordCollider swordColliderUp;
@@ -33,10 +36,20 @@ public class AttackAbility : MonoBehaviour {
 	// and for the chain attacks if they end up being different
 
 	void Start() {
+
+		attackInfo = new AttackInfoContainer (AttackID.NormalAttack, attackForce);
+		playerInfo = GetComponent<PlayerInfoContainer> ();
 		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
 		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
 		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
+
+		//Disable colliders 
+		swordCollider.Disable();
+		swordColliderUp.Disable ();
+		swordColliderLeft.Disable ();
+		swordColliderRight.Disable ();
+
 		playerBody = GetComponent<Rigidbody2D> ();
 		orientationSystem = GetComponent<OrientationSystem> ();
 		playerAnimator = GetComponent<Animator> ();
@@ -57,18 +70,34 @@ public class AttackAbility : MonoBehaviour {
 			timer = attackTime;
 			//Increase combo counter
 			comboCount++; //Use combo count to let animator know which attack is being performed
-			playerAnimator.SetInteger("ComboCount", comboCount);
+			playerAnimator.SetInteger ("ComboCount", comboCount);
 
 			//Determines which animation to play and which collider to enable
 			//Set attack animation ID (represented by an int)
 			if (comboCount == 1)
 				lastAttackDirection = attackDirection; 
-			
-			//playerFaceDirection = playerOrientation.GetDirection (CreateAttackVector ());
+
+			//Decide which animation to play
+			switch (comboCount) {
+			case 1:
+				playerAnimator.Play ("Attack 1");
+				break;
+			case 2:
+				playerAnimator.Play ("Attack 2");
+				break;
+			case 3:
+				playerAnimator.Play ("Attack 3");
+				break;
+			case 4:
+				playerAnimator.Play ("Attack 4");
+				break;
+			}
+
 			playerFaceDirection = orientationSystem.GetDirection (CreateAttackVector ());
 			//DetermineAttackDirection (playerFaceDirection);
 			ActivateCorrespondingCollider (playerFaceDirection);
 			playerAttacking = true;
+			playerInfo.UpdateAttackPerformed (attackInfo.GetAttackID(), attackInfo.GetForce() );
 			break;
 
 
