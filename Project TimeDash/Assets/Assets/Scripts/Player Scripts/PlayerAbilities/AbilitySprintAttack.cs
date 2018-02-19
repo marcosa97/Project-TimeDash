@@ -48,6 +48,48 @@ public class AbilitySprintAttack : MonoBehaviour {
 		playerAnimator = GetComponent<Animator> ();
 	}
 
+	//Activates the appropriate collider and animation ID/Integer
+	private void SetColliderAndAnimation(PlayerDirections playerDirection) {
+		switch (playerDirection) {
+		case PlayerDirections.RightUp:
+			Debug.Log ("RIGHT UP");
+			//Activate RightUp collider and animation
+			swordColliderRight.Enable ();
+			break;
+		case PlayerDirections.UpRight:
+			Debug.Log ("UP RIGHT");
+			swordColliderUp.Enable ();
+			break;
+		case PlayerDirections.UpLeft:
+			Debug.Log ("UP LEFT");
+			swordColliderUp.Enable ();
+			break;
+		case PlayerDirections.LeftUp:
+			Debug.Log ("LEFT UP");
+			swordColliderLeft.Enable ();
+			break;
+		case PlayerDirections.LeftDown:
+			Debug.Log ("LEFT DOWN");
+			swordColliderLeft.Enable ();
+			break;
+		case PlayerDirections.DownLeft:
+			Debug.Log ("DOWN LEFT");
+			swordCollider.Enable ();
+			break;
+		case PlayerDirections.DownRight:
+			Debug.Log ("DOWN RIGHT");
+			swordCollider.Enable ();
+			break;
+		case PlayerDirections.RightDown:
+			Debug.Log ("RIGHT DOWN");
+			swordColliderRight.Enable ();
+			break;
+		}
+
+		//Let animator which direction to face
+		playerAnimator.SetInteger ("PlayerAttackDirection", (int)playerDirection );
+	}
+
 	public void SprintAttack(ref PlayerState playerState, Vector3 attackDirection) {
 		switch (attackState) {
 		case AttackState.Setup:
@@ -121,46 +163,25 @@ public class AbilitySprintAttack : MonoBehaviour {
 			break;
 		}
 	}
+		
+	public void ResetState(ref PlayerState playerState) {
+		playerState = PlayerState.Default;
+		attackState = AttackState.Setup;
+		attackTimer = 0f;
+		currentLerpTime = 0f;
+		startPosition = Vector2.zero;
+		playerBody.velocity = Vector2.zero;
 
-	//Activates the appropriate collider and animation ID/Integer
-	private void SetColliderAndAnimation(PlayerDirections playerDirection) {
-		switch (playerDirection) {
-		case PlayerDirections.RightUp:
-			Debug.Log ("RIGHT UP");
-			//Activate RightUp collider and animation
-			swordColliderRight.Enable ();
-			break;
-		case PlayerDirections.UpRight:
-			Debug.Log ("UP RIGHT");
-			swordColliderUp.Enable ();
-			break;
-		case PlayerDirections.UpLeft:
-			Debug.Log ("UP LEFT");
-			swordColliderUp.Enable ();
-			break;
-		case PlayerDirections.LeftUp:
-			Debug.Log ("LEFT UP");
-			swordColliderLeft.Enable ();
-			break;
-		case PlayerDirections.LeftDown:
-			Debug.Log ("LEFT DOWN");
-			swordColliderLeft.Enable ();
-			break;
-		case PlayerDirections.DownLeft:
-			Debug.Log ("DOWN LEFT");
-			swordCollider.Enable ();
-			break;
-		case PlayerDirections.DownRight:
-			Debug.Log ("DOWN RIGHT");
-			swordCollider.Enable ();
-			break;
-		case PlayerDirections.RightDown:
-			Debug.Log ("RIGHT DOWN");
-			swordColliderRight.Enable ();
-			break;
-		}
+		//Clear list of targets that were hit
+		swordCollider.AttackHasEnded (); 
+		swordColliderUp.AttackHasEnded (); 
+		swordColliderLeft.AttackHasEnded (); 
+		swordColliderRight.AttackHasEnded (); 
 
-		//Let animator which direction to face
-		playerAnimator.SetInteger ("PlayerAttackDirection", (int)playerDirection );
+		//Disable colliders
+		swordCollider.Disable();
+		swordColliderUp.Disable ();
+		swordColliderLeft.Disable ();
+		swordColliderRight.Disable (); 
 	}
 }

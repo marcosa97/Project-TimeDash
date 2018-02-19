@@ -72,8 +72,6 @@ public class AttackAbility : MonoBehaviour {
 			comboCount++; //Use combo count to let animator know which attack is being performed
 			playerAnimator.SetInteger ("ComboCount", comboCount);
 
-			//Determines which animation to play and which collider to enable
-			//Set attack animation ID (represented by an int)
 			if (comboCount == 1)
 				lastAttackDirection = attackDirection; 
 
@@ -93,10 +91,12 @@ public class AttackAbility : MonoBehaviour {
 				break;
 			}
 
+			//Determine which animation to play and which collider to enable
 			playerFaceDirection = orientationSystem.GetDirection (CreateAttackVector ());
-			//DetermineAttackDirection (playerFaceDirection);
 			ActivateCorrespondingCollider (playerFaceDirection);
 			playerAttacking = true;
+
+			//Let the player info container know what just happened
 			playerInfo.UpdateAttackPerformed (attackInfo.GetAttackID(), attackInfo.GetForce() );
 			break;
 
@@ -246,6 +246,30 @@ public class AttackAbility : MonoBehaviour {
 		lastAttackDirection.x -= transform.position.x;
 		lastAttackDirection.y -= transform.position.y;
 		return v;
+	}
+
+	//Cancels the state by stopping the attack and returning to default state
+	public void ResetState(ref PlayerState playerState) {
+		playerState = PlayerState.Default;
+		attackState = AttackState.Ready;
+		timer = 0f;
+		comboCount = 0;
+		playerAttacking = false;
+		playerBody.velocity = Vector2.zero;
+
+		//Deactivate sword collider
+		//NEED UPDATE: Find a way to only make one call and disable the activated collider
+		//Let collider know that attack has ended so it can clear its list of attacked enemies
+		swordCollider.AttackHasEnded ();
+		swordColliderUp.AttackHasEnded ();
+		swordColliderLeft.AttackHasEnded ();
+		swordColliderRight.AttackHasEnded ();
+
+		//Disable colliders
+		swordCollider.Disable();
+		swordColliderUp.Disable ();
+		swordColliderLeft.Disable ();
+		swordColliderRight.Disable ();
 	}
 
 }

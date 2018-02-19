@@ -53,7 +53,7 @@ public class SwordCollider : MonoBehaviour {
 
 					//damage the enemy
 					//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
-					float force = 150;
+
 					AttackInfoObject obj = new AttackInfoObject (playerInfo.GetAttackForce(), 
 						                                         moveInfo.GetLastMove ().normalized);
 					other.SendMessage("ObjectHit", obj );

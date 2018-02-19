@@ -20,17 +20,17 @@ public class AbilityChargedAttack : MonoBehaviour {
 
 	//References and variables needed
 	private float timer;
-	private float finalAttackForce;
+	private float finalAttackForce; //after modifications applied
 	private AttackInfoContainer attackInfo;
 	private ChargeAttackState chargeAttackState;
 	private PlayerOrientation playerOrientation;
 	private PlayerDirections playerDirection; //enum
 	private AbilityBasicMovement movementInfo;
 	private Rigidbody2D playerBody;
-	private SpriteRenderer spriteRenderer;
+	private SpriteRenderer spriteRenderer; //needed to make sprite flash
 	private Animator animator;
 	private OrientationSystem orientationSystem;
-	private EightDirections playerFaceDirection;
+	private EightDirections playerFaceDirection; //enum
 	private Vector2 lastAttackDirection; 
 	private bool playerChargeAttacking;
 
@@ -200,6 +200,25 @@ public class AbilityChargedAttack : MonoBehaviour {
 
 			break;
 		}
+	}
+
+	public void ResetState(ref PlayerState playerState) {
+		playerState = PlayerState.Default;
+		chargeAttackState = ChargeAttackState.Setup;
+		timer = 0f;
+		spriteRenderer.material.SetFloat ("_FlashAmount", 0f); 
+		playerBody.velocity = Vector2.zero;
+		finalAttackForce = baseAttackForce;
+
+		//Deactivate collider 
+		colliderUp.AttackHasEnded ();
+		colliderDown.AttackHasEnded ();
+		colliderLeft.AttackHasEnded ();
+		colliderRight.AttackHasEnded ();
+		colliderUp.Disable ();
+		colliderDown.Disable ();
+		colliderLeft.Disable ();
+		colliderRight.Disable ();
 	}
 
 }

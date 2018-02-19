@@ -254,4 +254,14 @@ public class AbilityBasicMovement : MonoBehaviour {
 		return target;
 	}
 
+	//Resets the state variables to how they are before the player enters this state
+	public void ResetState(ref PlayerState playerState) {
+		moveState = MoveState.ChargeAttackTimeWindow;
+		playerState = PlayerState.Default;
+		timer = 0f;
+		playerBody.velocity = Vector2.zero;
+		playerMoving = false;
+		playerSprinting = false;
+	}
+
 }

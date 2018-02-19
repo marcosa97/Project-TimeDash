@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//This class controls the player's state machine. Contains and manages all the ability scripts
 public class PlayerController : MonoBehaviour {
 	//Indicates to the state machine the current state
 	public PlayerState playerState; //make private when done debugging
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour {
 	private AbilityDodgeRoll dodgeAbility;
 	private AbilitySprintAttack sprintAttackAbility;
 	private AbilityChargedAttack chargedAttackAbility;
+	private PlayerStateFlinch flinchState;
 	//public AbilityHyperDash abilityHyperDash;
 
 	// Use this for initialization
@@ -41,6 +43,7 @@ public class PlayerController : MonoBehaviour {
 		dodgeAbility = GetComponent<AbilityDodgeRoll> ();
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
 		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
+		flinchState = GetComponent<PlayerStateFlinch> ();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
 
 		//If Player doesn't exist yet
@@ -144,6 +147,10 @@ public class PlayerController : MonoBehaviour {
 			dodgeAbility.DodgeRoll (ref playerState, shieldAbility.GetDodgeRollDirection ());
 			break;
 
+		case PlayerState.Flinch:
+			flinchState.Flinch (ref playerState);
+			break;
+
 		case PlayerState.HyperDashing:
 			//if (abilityHyperDash.hyperDashingActive)
 			////////attackDirection = GetMousePositionVector ();
@@ -166,6 +173,50 @@ public class PlayerController : MonoBehaviour {
 
 		//anim.SetInteger ("PlayerAttackDirection", (int)playerDirection);
 	}
+
+	//====================FOR SWITCHING INTO HURT STATE=========================
+
+	//Changes the current player state to default
+	private void CancelCurrentState() {
+		switch (playerState) {
+		case PlayerState.Default:
+			//Stay in this state, so do nothing
+			break;
+		case PlayerState.Moving:
+			basicMovement.ResetState (ref playerState);
+			break;
+		case PlayerState.Attacking:
+			attackAbility.ResetState (ref playerState);
+			break;
+		case PlayerState.ChargedAttacking:
+			chargedAttackAbility.ResetState (ref playerState);
+			break;
+		case PlayerState.SprintAttacking:
+			sprintAttackAbility.ResetState (ref playerState);
+			break;
+		case PlayerState.Shielding:
+
+			break;
+		case PlayerState.Flinch:
+			flinchState.ResetState (ref playerState);
+			break;
+		//Add cases for grabbing and other states 
+		}
+	}
+
+	//pass in AttackType and an AttackInfoObject
+	public void HurtPlayer(AttackType attackType) {
+		CancelCurrentState ();
+
+		switch(attackType) {
+		case AttackType.MeleeWeakAttack:
+			playerState = PlayerState.Flinch;
+			break;
+		case AttackType.MeleeStrongAttack:
+			//playerState = PlayerState.KnockBackAir;
+			break;
+		}
+	}
 	
 	//Ignores sword collider
 	// @other: the player
@@ -181,7 +232,13 @@ public class PlayerController : MonoBehaviour {
 
 }
 
-
+public enum AttackType {
+	MeleeWeakAttack,
+	MeleeStrongAttack
+	//Arrow
+	//Stun
+	//etc
+}
 
 //State Machine for player
 public enum PlayerState {
@@ -194,11 +251,12 @@ public enum PlayerState {
 	HyperDashing,
 	Shielding,
 	DodgeRolling,
-	Grabbing
+	Grabbing,
+	Flinch //Hurt from weak hit
 	//DashGrabbing
-	//Charging Attack
 	//Hurt
 	//Knocked Back
+	//OnGroundFromKnockBack
 	//Interacting with Object
 	//Talking with NPC
 	//Climbing
