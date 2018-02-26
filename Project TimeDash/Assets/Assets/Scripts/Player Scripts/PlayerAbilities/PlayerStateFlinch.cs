@@ -21,6 +21,7 @@ public class PlayerStateFlinch : MonoBehaviour {
 	private SpriteRenderer spriteRenderer;
 	private Animator animator;
 	private Rigidbody2D playerBody;
+	private HurtInfoReceiver hurtInfo;
 
 	// Use this for initialization
 	void Start () {
@@ -30,15 +31,8 @@ public class PlayerStateFlinch : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 		animator = GetComponent<Animator> ();
 		playerBody = GetComponent<Rigidbody2D> ();
+		hurtInfo = GetComponent<HurtInfoReceiver> ();
 	}
-
-    //Used by the player controller to set the direction
-	// in which the player will be knocked back. 
-	// Note: This function has to be called before entering
-	//       this state if there will be knockback
-	//public void SetKnockbackDirection(Vector2 dir) {
-
-	//}
 
 	//Makes the player flinch (when player is hurt)
 	public void Flinch(ref PlayerState playerState) {
@@ -52,6 +46,7 @@ public class PlayerStateFlinch : MonoBehaviour {
 			spriteRenderer.material.SetFloat ("_FlashAmount", 0.60f);
 
 			//Add force to player in a direction
+			playerBody.AddForce(hurtInfo.direction * hurtInfo.force);
 
 			flinchState = FlinchState.Flinching;
 

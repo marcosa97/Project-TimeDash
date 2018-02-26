@@ -11,7 +11,7 @@ public class AttackAbility : MonoBehaviour {
 	public float regularCooldownTime;
 	public float comboCooldownTime;
 	public int comboMax;
-	public int attackForce; //knockback
+	public int baseAttackForce; //knockback
 	 
 	//References and variables needed
 	private int comboCount;
@@ -25,8 +25,7 @@ public class AttackAbility : MonoBehaviour {
 	private OrientationSystem orientationSystem;
 	private AbilityBasicMovement movementInfo;
 	private bool playerAttacking;
-	private AttackInfoContainer attackInfo;
-	private PlayerInfoContainer playerInfo;
+	private AttackInfoContainer playerAttackInfo;
 
 	private SwordCollider swordCollider;
 	private SwordCollider swordColliderUp;
@@ -36,9 +35,7 @@ public class AttackAbility : MonoBehaviour {
 	// and for the chain attacks if they end up being different
 
 	void Start() {
-
-		attackInfo = new AttackInfoContainer (AttackID.NormalAttack, attackForce);
-		playerInfo = GetComponent<PlayerInfoContainer> ();
+		playerAttackInfo = GetComponent<AttackInfoContainer> ();
 		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
 		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
@@ -96,8 +93,9 @@ public class AttackAbility : MonoBehaviour {
 			ActivateCorrespondingCollider (playerFaceDirection);
 			playerAttacking = true;
 
-			//Let the player info container know what just happened
-			playerInfo.UpdateAttackPerformed (attackInfo.GetAttackID(), attackInfo.GetForce() );
+			//Let the attack info container know what just happened
+			playerAttackInfo.UpdateAttackInfo (AttackID.NormalAttack, 
+				baseAttackForce, movementInfo.GetLastMove().normalized );
 			break;
 
 

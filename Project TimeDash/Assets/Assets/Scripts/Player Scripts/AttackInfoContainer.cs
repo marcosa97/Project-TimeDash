@@ -2,27 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine; 
 
-//Each attack script will contain one of these to store info on attack
-public class AttackInfoContainer {
-	//Private
-	private AttackID AttackID;
-	//private int damage;
-	private float baseAttackForce; //To determine knockback, unmodified by power ups
-
-	//Public
-	public AttackInfoContainer(AttackID ID, float f) { 
-		AttackID = ID;
-		baseAttackForce = f; 
-	}
-		
-	public AttackID GetAttackID() {
-		return AttackID;
-	}
-
-	public float GetForce() { 
-		return baseAttackForce; 
-	} 
+/// <summary>
+///   These containers store the information of an attack performed
+///   by either the player or an enemy. Copies of these objects will be passed
+///   to whoever is on the receiving end of the attack, and the game object
+///   attached to that unit will handle accordingly how it gets hurt
+/// </summary>
+public class AttackInfoContainer : MonoBehaviour {
 	
+	public AttackID AttackID;
+	public AttackType attackType;
+	public Vector2 direction; //Direction vector relative to the entity performing the attack (magnitude = 1)
+	public float force; //To determine knockback, unmodified by power ups
+	//public int damage;
+
+	//Default constructor
+	public AttackInfoContainer() {
+		AttackID = AttackID.Null;
+		attackType = AttackType.Null;
+		direction = Vector2.zero;
+		force = 0f;
+	}
+
+	//Updates variables of this container
+	public void UpdateAttackInfo(AttackID ID, float f, Vector2 dir) { 
+		AttackID = ID;
+		force = f; 
+		direction = dir;
+	}
+	
+}
+
+public enum AttackType {
+	Null,
+	MeleeWeakAttack,
+	MeleeStrongAttack
+	//Arrow
+	//Stun
+	//etc
 }
 
 public enum AttackID {

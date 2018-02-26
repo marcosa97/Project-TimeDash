@@ -12,14 +12,59 @@ public class AbilityShield : MonoBehaviour {
 	private bool playerMoving; //Maybe use this for animator
 	private Vector2 moveDirection; 
 	private Rigidbody2D playerBody;
-	private AbilitiesHandler abilitiesHandler;
+	private Animator animator;
+	private OrientationSystem orientationSystem;
+	private EightDirections playerFaceDirection;
+
+	private PolygonCollider2D shieldColliderUp;
+	private PolygonCollider2D shieldColliderDown;
+	private PolygonCollider2D shieldColliderRight;
+	private PolygonCollider2D shieldColliderLeft;
 
 	// Use this for initialization
 	void Start () {
 		playerMoving = false;
 		moveDirection = Vector2.zero;
 		playerBody = GetComponent<Rigidbody2D> ();
-		abilitiesHandler = GetComponent<AbilitiesHandler> ();
+		animator = GetComponent<Animator> ();
+		shieldColliderUp = GameObject.Find ("Shield Collider Up").GetComponent<PolygonCollider2D> ();
+		shieldColliderDown = GameObject.Find ("Shield Collider Down").GetComponent<PolygonCollider2D> ();
+		shieldColliderRight = GameObject.Find ("Shield Collider Right").GetComponent<PolygonCollider2D> ();
+		shieldColliderLeft = GameObject.Find ("Shield Collider Left").GetComponent<PolygonCollider2D> ();
+
+		shieldColliderUp.enabled = false;
+		shieldColliderDown.enabled = false;
+		shieldColliderRight.enabled = false;
+		shieldColliderLeft.enabled = false;
+	}
+
+	private void ActivateCorrespondingCollider(EightDirections dir) {
+		switch (dir) {
+		case EightDirections.North:
+			shieldColliderUp.enabled = true;
+			break;
+		case EightDirections.NorthEast:
+
+			break;
+		case EightDirections.East:
+			shieldColliderRight.enabled = true;
+			break;
+		case EightDirections.SouthEast:
+
+			break;
+		case EightDirections.South:
+			shieldColliderDown.enabled = true;
+			break;
+		case EightDirections.SouthWest:
+
+			break;
+		case EightDirections.West:
+			shieldColliderLeft.enabled = true;
+			break;
+		case EightDirections.NorthWest:
+
+			break;
+		}
 	}
 
 	//Like PlayerController's Move() function, except this one makes the player move while shielding
@@ -58,11 +103,16 @@ public class AbilityShield : MonoBehaviour {
 		Strafe ();
 
 		//Activate shield collider here
+		//playerFaceDirection = orientationSystem.GetDirection(
+		shieldColliderUp.enabled = true;
 
 		//If player is shielding, stay in this state; else, go to default
 		if (isShielding ()) {
 			//Stay in this state
+			animator.Play("Shield State");
 		} else {
+			shieldColliderUp.enabled = false;
+
 			playerState = PlayerState.Default;
 			return;
 		}
@@ -70,12 +120,13 @@ public class AbilityShield : MonoBehaviour {
 		//Check for Grab, Dodge, or (maybe) Jump inputs
 		//Grab
 		if (Input.GetButtonDown ("AttackPS4")) {
-			//Make a Dodging script?
+			//shieldColliderUp.enabled = false;
+			//Switch to grab state
 		} else if (Input.GetButtonDown ("SprintPS4")) {
 			//Check if there's any movement
 			if (playerMoving) {
 				//Switch to DodgeRoll state
-				abilitiesHandler.activateDodgeTimer(); 
+				shieldColliderUp.enabled = false;
 				playerState = PlayerState.DodgeRolling;
 			}
 		}
@@ -84,6 +135,15 @@ public class AbilityShield : MonoBehaviour {
 
 	public Vector2 GetDodgeRollDirection() {
 		return moveDirection;
+	}
+
+	public void ResetState(ref PlayerState playerState) {
+		//Disable colliders
+		shieldColliderUp.enabled = false;
+
+		playerMoving = false;
+		moveDirection = Vector2.zero;
+		playerState = PlayerState.Default;
 	}
 
 }

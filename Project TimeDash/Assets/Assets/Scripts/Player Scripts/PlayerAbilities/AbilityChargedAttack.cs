@@ -21,7 +21,6 @@ public class AbilityChargedAttack : MonoBehaviour {
 	//References and variables needed
 	private float timer;
 	private float finalAttackForce; //after modifications applied
-	private AttackInfoContainer attackInfo;
 	private ChargeAttackState chargeAttackState;
 	private PlayerOrientation playerOrientation;
 	private PlayerDirections playerDirection; //enum
@@ -34,7 +33,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 	private Vector2 lastAttackDirection; 
 	private bool playerChargeAttacking;
 
-	private PlayerInfoContainer playerInfo;
+	private AttackInfoContainer playerAttackInfo;
 
 	//Collider scripts
 	private SwordCollider colliderUp;
@@ -44,8 +43,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		attackInfo = new AttackInfoContainer (AttackID.ChargedAttack, baseAttackForce);
-		playerInfo = GetComponent<PlayerInfoContainer> ();
+		playerAttackInfo = GetComponent<AttackInfoContainer> ();
 		playerOrientation = GetComponent<PlayerOrientation> ();
 		movementInfo = GetComponent<AbilityBasicMovement> ();
 		playerBody = GetComponent<Rigidbody2D> ();
@@ -150,7 +148,9 @@ public class AbilityChargedAttack : MonoBehaviour {
 				spriteRenderer.material.SetFloat ("_FlashAmount", 0f);
 				chargeAttackState = ChargeAttackState.Attacking;
 				ActivateCorrespondingCollider (playerFaceDirection); 
-				playerInfo.UpdateAttackPerformed (attackInfo.GetAttackID(), finalAttackForce);
+	
+				playerAttackInfo.UpdateAttackInfo (AttackID.ChargedAttack, finalAttackForce,
+					movementInfo.GetLastMove ().normalized);
 			}
 
 			//If button is still being held down

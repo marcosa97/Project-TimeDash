@@ -4,6 +4,10 @@ using UnityEngine;
 
 //NOTE: Sword collider will be a Trigger collider because that way it can ignore the Player's
 //        collision box and it won't push the player away either.
+
+//NOTE: OnColliderEnter2D and OnTriggerEnter2D did not work as intended
+//        because of how I decided to handle collider collisions (disabling,
+//        and enabling colliders)
 public class SwordCollider : MonoBehaviour {
 	private List<int> targetsHit; //targets hit in one sword slash
 	private bool attackHasEnded; 
@@ -12,7 +16,7 @@ public class SwordCollider : MonoBehaviour {
 	private GameObject obj; //set in inspector
 	private TimeFunctions timeManager;
 	private GameObject hitParticles;
-	private PlayerInfoContainer playerInfo;
+	private AttackInfoContainer playerAttackInfo;
 
 	// Use this for initialization
 	void Start () {
@@ -20,7 +24,7 @@ public class SwordCollider : MonoBehaviour {
 		targetsHit = new List<int> ();
 		attackHasEnded = true;
 		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
-		playerInfo = GetComponentInParent<PlayerInfoContainer> ();
+		playerAttackInfo = GetComponentInParent<AttackInfoContainer> ();
 		obj = GameObject.Find ("Time Manager");
 		timeManager = obj.GetComponent<TimeFunctions> ();
 		hitParticles = GameObject.Find ("HitParticles");
@@ -30,17 +34,6 @@ public class SwordCollider : MonoBehaviour {
 	void Update () {
 		
 	}
-
-	/*
-	//Ignore collisions with the player collider 
-	// @other: the player
-	void OnTriggerEnter (Collider player) {
-		if (player.tag == "Player") {
-			//Line below calls the function ApplyDamage(10)
-			//other.gameObject.SendMessage("ApplyDamage", 10);
-			return;
-		}
-	} */
 
 	// @other: could be an enemy, object, or switch
 	void OnTriggerStay2D (Collider2D other) {
@@ -54,9 +47,9 @@ public class SwordCollider : MonoBehaviour {
 					//damage the enemy
 					//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
 
-					AttackInfoObject obj = new AttackInfoObject (playerInfo.GetAttackForce(), 
-						                                         moveInfo.GetLastMove ().normalized);
-					other.SendMessage("ObjectHit", obj );
+					//Get attack info from the attack info object attached to the player,
+					//  and send it to the other object to process	
+					other.SendMessage("ObjectHit", playerAttackInfo );
 
 					//Call Time.Timescale using SendMessage or a reference to time manager
 					timeManager.StartCoroutine("HitStop");
@@ -83,22 +76,12 @@ public class SwordCollider : MonoBehaviour {
 
 	}
 
+	//================FOR CONTROLLING COLLIDER==============
 
-	/*
-	// @other: could be an enemy, object, or switch
-	void OnCollisionEnter2D (Collision2D other) {
-		Debug.Log ("COLLIDER ENABLED");
-		if (enabled) {
-			if (other.gameObject.tag == "Enemy") {
-				//Line below calls the function ApplyDamage(10)
-				//other.gameObject.SendMessage("ApplyDamage", 10);
-				//other.gameObject.SetActive (false);
-				other.gameObject.GetComponent<HealthManager>().ReceiveDamage(10);
-			}
-		}
-	}
-	*/
-
+	/// <summary>
+	///   This function clears the "targetsHit" list.
+	///   This will be called at the end of an attack
+	/// </summary>
 	public void AttackHasEnded() {
 		attackHasEnded = true;
 		if (targetsHit != null)
@@ -112,26 +95,5 @@ public class SwordCollider : MonoBehaviour {
 	public void Enable() {
 		enabled = true;
 		attackHasEnded = false;
-	}
-}
-
-//Object
-//Contains the force and direction of an attack
-public class AttackInfoObject {
-//Private
-	private float force; //Attack strength
-	private Vector2 direction; //Direction created from GetAxis
-//Public
-	public AttackInfoObject(float f, Vector2 v) {
-		force = f;
-		direction = v.normalized;
-	}
-
-	public Vector2 GetDirection() {
-		return direction;
-	}
-
-	public float GetForce() {
-		return force;
 	}
 }

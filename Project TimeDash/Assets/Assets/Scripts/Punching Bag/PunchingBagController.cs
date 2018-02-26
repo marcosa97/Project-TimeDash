@@ -17,14 +17,12 @@ public class PunchingBagController : MonoBehaviour {
 	}
 
 	//Pass in an object AttackInfo that contains attack direction and attack force
-	void ObjectHit(AttackInfoObject obj) {
+	void ObjectHit(AttackInfoContainer obj) {
 		Debug.Log ("PUNCHING bag HIT");
 		isHit = true;
 		anim.SetBool ("Hit", isHit);
 
-		float force = 200;
-
-		body.AddForce (obj.GetDirection() * obj.GetForce() );
+		body.AddForce (obj.direction * obj.force );
 	}
 
 }

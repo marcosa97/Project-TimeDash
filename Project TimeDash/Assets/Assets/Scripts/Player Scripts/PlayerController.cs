@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour {
 	private static bool playerExists;
 
 	//Structures that handle each ability's logic
-	//Set to private when done debugging
 	private AbilityBasicMovement basicMovement;
 	private DashAbility dashAbility;
 	private AttackAbility attackAbility;
@@ -32,7 +31,9 @@ public class PlayerController : MonoBehaviour {
 	private AbilitySprintAttack sprintAttackAbility;
 	private AbilityChargedAttack chargedAttackAbility;
 	private PlayerStateFlinch flinchState;
+	private HurtInfoReceiver hurtInfo;
 	//public AbilityHyperDash abilityHyperDash;
+
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +45,7 @@ public class PlayerController : MonoBehaviour {
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
 		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
+		hurtInfo = GetComponent<HurtInfoReceiver> ();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
 
 		//If Player doesn't exist yet
@@ -195,7 +197,7 @@ public class PlayerController : MonoBehaviour {
 			sprintAttackAbility.ResetState (ref playerState);
 			break;
 		case PlayerState.Shielding:
-
+			shieldAbility.ResetState (ref playerState);
 			break;
 		case PlayerState.Flinch:
 			flinchState.ResetState (ref playerState);
@@ -204,11 +206,14 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
-	//pass in AttackType and an AttackInfoObject
-	public void HurtPlayer(AttackType attackType) {
+	//pass in AttackType and an AttackInfoContainer
+	public void HurtPlayer(AttackInfoContainer enemyAttack) {
+		//Update info on hurt script
+		hurtInfo.UpdateHurtInfo(enemyAttack);
+
 		CancelCurrentState ();
 
-		switch(attackType) {
+		switch(enemyAttack.attackType) {
 		case AttackType.MeleeWeakAttack:
 			playerState = PlayerState.Flinch;
 			break;
@@ -230,14 +235,6 @@ public class PlayerController : MonoBehaviour {
 	}
 	*/
 
-}
-
-public enum AttackType {
-	MeleeWeakAttack,
-	MeleeStrongAttack
-	//Arrow
-	//Stun
-	//etc
 }
 
 //State Machine for player
