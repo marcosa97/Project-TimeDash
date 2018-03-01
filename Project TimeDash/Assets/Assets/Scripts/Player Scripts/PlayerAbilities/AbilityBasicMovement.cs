@@ -101,8 +101,8 @@ public class AbilityBasicMovement : MonoBehaviour {
 		//if (moveHorizontal > 0.5f || moveHorizontal < -0.5f || moveVertical > 0.5f || moveVertical < -0.5f) {
 		if (moveHorizontal > 0f || moveHorizontal < -0f || moveVertical > 0f || moveVertical < -0f) {
 			//Move player
-			Mathf.Clamp (moveVertical, 0f, 1f);
-			Mathf.Clamp (moveHorizontal, 0f, 1f);
+			Mathf.Clamp (moveVertical, -1f, 1f);
+			Mathf.Clamp (moveHorizontal, -1f, 1f);
 			playerBody.velocity = new Vector2 (moveHorizontal * moveSpeed, moveVertical * moveSpeed);
 
 			playerMoving = true;
