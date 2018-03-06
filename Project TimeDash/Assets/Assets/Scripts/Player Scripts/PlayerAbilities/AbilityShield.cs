@@ -19,7 +19,6 @@ public class AbilityShield : MonoBehaviour {
 	private Rigidbody2D playerBody;
 	private Animator animator;
 	private OrientationSystem orientationSystem;
-	private Vector2 rawFaceDirection; //Vector representing face direction
 	private EightDirections playerFaceDirection;
 	private ShieldState shieldState;
 	private AbilityBasicMovement moveInfo;
@@ -151,13 +150,9 @@ public class AbilityShield : MonoBehaviour {
 		switch(shieldState) {
 		case ShieldState.Setup:
 			//Activate shield collider here
-			rawFaceDirection = moveInfo.GetLastMove();
-			rawFaceDirection.x += transform.position.x;
-			rawFaceDirection.y += transform.position.y;
-			playerFaceDirection = orientationSystem.GetDirection (rawFaceDirection);
-			Debug.Log (moveInfo.GetLastMove ());
+			playerFaceDirection = orientationSystem.DetermineDirectionFromVector (moveInfo.GetLastMove ());
 			ActivateCorrespondingCollider (playerFaceDirection);
-			Debug.Log (playerFaceDirection);
+			//Debug.Log (playerFaceDirection);
 
 			//Play animation
 			animator.Play ("Shield State");
@@ -206,14 +201,12 @@ public class AbilityShield : MonoBehaviour {
 	}
 
 	public void ResetState(ref PlayerState playerState) {
-		//Disable colliders
-		shieldColliderUp.enabled = false;
-		shieldColliderDown.enabled = false;
-		shieldColliderLeft.enabled = false;
-		shieldColliderRight.enabled = false;
+		//Deactivate collider
+		DeactivateCorrespondingCollider(playerFaceDirection);
 
 		playerMoving = false;
 		moveDirection = Vector2.zero;
+		shieldState = ShieldState.Setup;
 		playerState = PlayerState.Default;
 	}
 

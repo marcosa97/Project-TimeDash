@@ -16,13 +16,13 @@ public class DashAbility : MonoBehaviour {
 	public Rigidbody2D playerBody; //We need reference so we can move the body
 	public PlayerController playerController;
 	private BoxCollider2D playerCollider;
-	private AbilitiesHandler abilitiesHandler;
+	////private AbilitiesHandler abilitiesHandler;
 
 	void Start() {
 		playerBody = GetComponent<Rigidbody2D> ();
 		playerController = GetComponent<PlayerController> ();
 		playerCollider = GetComponent<BoxCollider2D> ();
-		abilitiesHandler = GetComponent<AbilitiesHandler> ();
+		////abilitiesHandler = GetComponent<AbilitiesHandler> ();
 	}
 
 	//Updates every frame
@@ -88,7 +88,7 @@ public class DashAbility : MonoBehaviour {
 			playerState = PlayerState.Default;
 
 			//Activate Cooldown Timer
-			abilitiesHandler.activateDashTimer();
+			////abilitiesHandler.activateDashTimer(); !!!!
 
 			//Where I left off: handle movement so that the player can do anything except dash right after dashing
 			//Stop dash movement

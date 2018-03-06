@@ -38,14 +38,10 @@ public class AttackAbility : MonoBehaviour {
 		playerAttackInfo = GetComponent<AttackInfoContainer> ();
 		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
 		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
+		if (swordColliderUp == null)
+			Debug.Log ("NULL UP ");
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
 		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
-
-		//Disable colliders 
-		swordCollider.Disable();
-		swordColliderUp.Disable ();
-		swordColliderLeft.Disable ();
-		swordColliderRight.Disable ();
 
 		playerBody = GetComponent<Rigidbody2D> ();
 		orientationSystem = GetComponent<OrientationSystem> ();
@@ -115,18 +111,7 @@ public class AttackAbility : MonoBehaviour {
 				//playerAttacking = false;
 
 				//Deactivate sword collider
-				//NEED UPDATE: Find a way to only make one call and disable the activated collider
-				//Let collider know that attack has ended so it can clear its list of attacked enemies
-				swordCollider.AttackHasEnded ();
-				swordColliderUp.AttackHasEnded ();
-				swordColliderLeft.AttackHasEnded ();
-				swordColliderRight.AttackHasEnded ();
-
-				//Disable colliders
-				swordCollider.Disable();
-				swordColliderUp.Disable ();
-				swordColliderLeft.Disable ();
-				swordColliderRight.Disable ();
+				DeactivateCorrespondingCollider(playerFaceDirection);
 
 				//Window of time that player can chain another attack for a combo
 				if (comboCount != comboMax) {
@@ -193,8 +178,7 @@ public class AttackAbility : MonoBehaviour {
 		switch (direction) {
 		case EightDirections.North:
 			//Debug.Log ("North");
-			//Activate RightUp collider and animation
-			swordColliderUp.Enable();
+			swordColliderUp.EnableCollider ();
 			break;
 		case EightDirections.NorthEast:
 			//Debug.Log ("North East");
@@ -202,7 +186,7 @@ public class AttackAbility : MonoBehaviour {
 			break;
 		case EightDirections.East:
 			//Debug.Log ("East");
-			swordColliderRight.Enable ();
+			swordColliderRight.EnableCollider();
 			break;
 		case EightDirections.SouthEast:
 			//Debug.Log ("South East");
@@ -210,7 +194,7 @@ public class AttackAbility : MonoBehaviour {
 			break;
 		case EightDirections.South:
 			//Debug.Log ("South");
-			swordCollider.Enable ();
+			swordCollider.EnableCollider();
 			break;
 		case EightDirections.SouthWest:
 			//Debug.Log ("South West");
@@ -218,16 +202,50 @@ public class AttackAbility : MonoBehaviour {
 			break;
 		case EightDirections.West:
 			//Debug.Log ("West");
-			swordColliderLeft.Enable ();
+			swordColliderLeft.EnableCollider();
 			break;
 		case EightDirections.NorthWest:
 			//Debug.Log ("North West");
 			//swordColliderRight.Enable ();
 			break;
 		}
+	}
 
-		//Let animator which direction to face
-		playerAnimator.SetInteger ("PlayerAttackDirection", (int)direction);
+	private void DeactivateCorrespondingCollider(EightDirections direction) {
+		switch (direction) {
+		case EightDirections.North:
+			//Debug.Log ("North");
+			swordColliderUp.DisableCollider ();
+			break;
+		case EightDirections.NorthEast:
+			//Debug.Log ("North East");
+			//swordColliderUp.Enable ();
+			break;
+		case EightDirections.East:
+			//Debug.Log ("East");
+			swordColliderRight.DisableCollider();
+			break;
+		case EightDirections.SouthEast:
+			//Debug.Log ("South East");
+			//swordColliderLeft.Enable ();
+			break;
+		case EightDirections.South:
+			//Debug.Log ("South");
+			swordCollider.DisableCollider();
+			break;
+		case EightDirections.SouthWest:
+			//Debug.Log ("South West");
+			//swordCollider.Enable ();
+			break;
+		case EightDirections.West:
+			//Debug.Log ("West");
+			swordColliderLeft.DisableCollider();
+			break;
+		case EightDirections.NorthWest:
+			//Debug.Log ("North West");
+			//swordColliderRight.Enable ();
+			break;
+		}
 	}
 
 	//=================GETTER FUNCTIONS===================
@@ -256,18 +274,7 @@ public class AttackAbility : MonoBehaviour {
 		playerBody.velocity = Vector2.zero;
 
 		//Deactivate sword collider
-		//NEED UPDATE: Find a way to only make one call and disable the activated collider
-		//Let collider know that attack has ended so it can clear its list of attacked enemies
-		swordCollider.AttackHasEnded ();
-		swordColliderUp.AttackHasEnded ();
-		swordColliderLeft.AttackHasEnded ();
-		swordColliderRight.AttackHasEnded ();
-
-		//Disable colliders
-		swordCollider.Disable();
-		swordColliderUp.Disable ();
-		swordColliderLeft.Disable ();
-		swordColliderRight.Disable ();
+		DeactivateCorrespondingCollider (playerFaceDirection);
 	}
 
 }

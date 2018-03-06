@@ -24,11 +24,12 @@ public class AbilitySprintAttack : MonoBehaviour {
 	private Vector2 startPosition; //For sprint attack lerp
 	private float attackTimer;
 	private Rigidbody2D playerBody; //We need reference so we can move the body
-	private PlayerOrientation playerOrientation;
+	private OrientationSystem orientationSystem;
+	private EightDirections playerFaceDirection;
 	private Animator playerAnimator;
-	//private PlayerInfoContainer playerInfo;
 	private AbilityBasicMovement movementInfo;
 	private AttackInfoContainer playerAttackInfo;
+
 
 	//Colliders -> change these once I create new colliders for dashing
 	private SwordCollider swordCollider;
@@ -46,50 +47,85 @@ public class AbilitySprintAttack : MonoBehaviour {
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
 		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
 		playerBody = GetComponent<Rigidbody2D> ();
-		playerOrientation = GetComponent<PlayerOrientation> ();
+		orientationSystem = GetComponent<OrientationSystem> ();
 		playerAnimator = GetComponent<Animator> ();
 	}
 
 	//Activates the appropriate collider and animation ID/Integer
-	private void SetColliderAndAnimation(PlayerDirections playerDirection) {
-		switch (playerDirection) {
-		case PlayerDirections.RightUp:
+	private void ActivateCorrespondingCollider(EightDirections dir) {
+		switch (dir) {
+		case EightDirections.North:
 			Debug.Log ("RIGHT UP");
 			//Activate RightUp collider and animation
-			swordColliderRight.Enable ();
+			swordColliderUp.EnableCollider();
 			break;
-		case PlayerDirections.UpRight:
+		case EightDirections.NorthEast:
 			Debug.Log ("UP RIGHT");
-			swordColliderUp.Enable ();
+			//swordColliderUp.EnableCollider ();
 			break;
-		case PlayerDirections.UpLeft:
+		case EightDirections.East:
 			Debug.Log ("UP LEFT");
-			swordColliderUp.Enable ();
+			swordColliderRight.EnableCollider ();
 			break;
-		case PlayerDirections.LeftUp:
+		case EightDirections.SouthEast:
 			Debug.Log ("LEFT UP");
-			swordColliderLeft.Enable ();
+			//swordColliderLeft.EnableCollider ();
 			break;
-		case PlayerDirections.LeftDown:
+		case EightDirections.South:
 			Debug.Log ("LEFT DOWN");
-			swordColliderLeft.Enable ();
+			swordCollider.EnableCollider ();
 			break;
-		case PlayerDirections.DownLeft:
+		case EightDirections.SouthWest:
 			Debug.Log ("DOWN LEFT");
-			swordCollider.Enable ();
+			//swordCollider.EnableCollider ();
 			break;
-		case PlayerDirections.DownRight:
+		case EightDirections.West:
 			Debug.Log ("DOWN RIGHT");
-			swordCollider.Enable ();
+			swordColliderLeft.EnableCollider ();
 			break;
-		case PlayerDirections.RightDown:
+		case EightDirections.NorthWest:
 			Debug.Log ("RIGHT DOWN");
-			swordColliderRight.Enable ();
+			//swordColliderRight.EnableCollider ();
 			break;
 		}
+	}
 
-		//Let animator which direction to face
-		playerAnimator.SetInteger ("PlayerAttackDirection", (int)playerDirection );
+	private void DeactivateCorrespondingCollider (EightDirections dir) {
+		switch (dir) {
+		case EightDirections.North:
+			Debug.Log ("RIGHT UP");
+			//Activate RightUp collider and animation
+			swordColliderUp.DisableCollider();
+			break;
+		case EightDirections.NorthEast:
+			Debug.Log ("UP RIGHT");
+			//swordColliderUp.EnableCollider ();
+			break;
+		case EightDirections.East:
+			Debug.Log ("UP LEFT");
+			swordColliderRight.DisableCollider ();
+			break;
+		case EightDirections.SouthEast:
+			Debug.Log ("LEFT UP");
+			//swordColliderLeft.EnableCollider ();
+			break;
+		case EightDirections.South:
+			Debug.Log ("LEFT DOWN");
+			swordCollider.DisableCollider ();
+			break;
+		case EightDirections.SouthWest:
+			Debug.Log ("DOWN LEFT");
+			//swordCollider.EnableCollider ();
+			break;
+		case EightDirections.West:
+			Debug.Log ("DOWN RIGHT");
+			swordColliderLeft.DisableCollider ();
+			break;
+		case EightDirections.NorthWest:
+			Debug.Log ("RIGHT DOWN");
+			//swordColliderRight.EnableCollider ();
+			break;
+		}
 	}
 
 	public void SprintAttack(ref PlayerState playerState, Vector3 attackDirection) {
@@ -104,8 +140,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 			currentLerpTime = 0f;
 			Debug.Log ("SPRINT ATTACK!"); 
 
-			SetColliderAndAnimation (playerOrientation.GetDirection (attackDirection)); 
-			//playerInfo.UpdateAttackPerformed (AttackID.SprintAttack, baseAttackForce);
+			playerFaceDirection = orientationSystem.DetermineDirectionFromVector (movementInfo.GetLastMove());
+			ActivateCorrespondingCollider (playerFaceDirection );  
 			playerAttackInfo.UpdateAttackInfo (AttackID.SprintAttack, baseAttackForce,
 				movementInfo.GetLastMove().normalized);
 			playerAnimator.Play ("Sprint Attack");
@@ -131,17 +167,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 			if (attackTimer <= 0f) {
 				attackState = AttackState.SprintAttackCooldown; 
 
-				//Clear list of targets that were hit
-				swordCollider.AttackHasEnded (); 
-				swordColliderUp.AttackHasEnded (); 
-				swordColliderLeft.AttackHasEnded (); 
-				swordColliderRight.AttackHasEnded (); 
-
 				//Disable colliders
-				swordCollider.Disable();
-				swordColliderUp.Disable ();
-				swordColliderLeft.Disable ();
-				swordColliderRight.Disable ();
+				DeactivateCorrespondingCollider(playerFaceDirection);
 
 				//Cooldown time for dash attack
 				attackTimer = sprintAttackCooldownTime;
@@ -176,16 +203,7 @@ public class AbilitySprintAttack : MonoBehaviour {
 		startPosition = Vector2.zero;
 		playerBody.velocity = Vector2.zero;
 
-		//Clear list of targets that were hit
-		swordCollider.AttackHasEnded (); 
-		swordColliderUp.AttackHasEnded (); 
-		swordColliderLeft.AttackHasEnded (); 
-		swordColliderRight.AttackHasEnded (); 
-
 		//Disable colliders
-		swordCollider.Disable();
-		swordColliderUp.Disable ();
-		swordColliderLeft.Disable ();
-		swordColliderRight.Disable (); 
+		DeactivateCorrespondingCollider(playerFaceDirection);
 	}
 }

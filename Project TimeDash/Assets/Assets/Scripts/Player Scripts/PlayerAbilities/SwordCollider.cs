@@ -10,10 +10,9 @@ using UnityEngine;
 //        and enabling colliders)
 public class SwordCollider : MonoBehaviour {
 	private List<int> targetsHit; //targets hit in one sword slash
-	private bool attackHasEnded; 
+	private Collider2D attachedCollider;
 	private AttackAbility attackScript;
 	private AbilityBasicMovement moveInfo;
-	private GameObject obj; //set in inspector
 	private TimeFunctions timeManager;
 	private GameObject hitParticles;
 	private AttackInfoContainer playerAttackInfo;
@@ -21,79 +20,78 @@ public class SwordCollider : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//swordCollider = GetComponent<Collider2D> ();
+		attachedCollider = GetComponent<PolygonCollider2D> ();
+		if (attachedCollider == null)
+			Debug.Log ("MISSING COLLIDER REF");
+		Debug.Log ("GOT COLLIDER REF");
 		targetsHit = new List<int> ();
-		attackHasEnded = true;
 		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
 		playerAttackInfo = GetComponentInParent<AttackInfoContainer> ();
-		obj = GameObject.Find ("Time Manager");
-		timeManager = obj.GetComponent<TimeFunctions> ();
+		timeManager = GameObject.Find("Time Manager").GetComponent<TimeFunctions> ();
 		hitParticles = GameObject.Find ("HitParticles");
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+		DisableCollider ();
 	}
 
 	// @other: could be an enemy, object, or switch
-	void OnTriggerStay2D (Collider2D other) {
-		if (enabled) {
-			if (other.tag == "Interactable Object") {
-				//if the enemy that was attacked hasn't already been damaged during this attack
-				// AKA, Hit Registered
-				if (!targetsHit.Contains (other.gameObject.GetInstanceID ())) {
-					//Debug.Log ("TARGET HIT : " + other.gameObject.GetInstanceID ());
+	void OnTriggerEnter2D (Collider2D other) {
+		if (other.tag == "Interactable Object") {
+			//if the enemy that was attacked hasn't already been damaged during this attack
+			// AKA, Hit Registered
+			if (!targetsHit.Contains (other.gameObject.GetInstanceID ())) {
+				//Debug.Log ("TARGET HIT : " + other.gameObject.GetInstanceID ());
 
-					//damage the enemy
-					//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
+				//damage the enemy
+				//other.gameObject.GetComponent<HealthManager> ().ReceiveDamage (10);
 
-					//Get attack info from the attack info object attached to the player,
-					//  and send it to the other object to process	
-					other.SendMessage("ObjectHit", playerAttackInfo );
+				//Get attack info from the attack info object attached to the player,
+				//  and send it to the other object to process	
+				other.SendMessage("ObjectHit", playerAttackInfo );
 
-					//Call Time.Timescale using SendMessage or a reference to time manager
-					timeManager.StartCoroutine("HitStop");
+				//Call Time.Timescale using SendMessage or a reference to time manager
+				timeManager.StartCoroutine("HitStop");
 
-					//Instantiate particle effect
-					var effect = Instantiate(hitParticles, other.transform.position, other.transform.rotation);
-					Destroy (effect, .5f);
+				//Instantiate particle effect
+				var effect = Instantiate(hitParticles, other.transform.position, other.transform.rotation);
+				Destroy (effect, .5f);
 
-					//Implement Hit lag here -> Create function that stops the player and the object(s) hit
-					//                          from moving
-					//What is needed for Hit Stop:
-						//Stop animation
-						//Stop player and object movement
+				//Implement Hit lag here -> Create function that stops the player and the object(s) hit
+				//                          from moving
+				//What is needed for Hit Stop:
+					//Stop animation
+					//Stop player and object movement
 
-					//add enemy to list of enemies already damaged during this attack
-					targetsHit.Add (other.gameObject.GetInstanceID ());
-				}
+				//add enemy to list of enemies already damaged during this attack
+				targetsHit.Add (other.gameObject.GetInstanceID ());
+			}
 					
-				//if enemy has already been damaged, then do nothing
+			//if enemy has already been damaged, then do nothing
 
-			}//if enemy hit
-
-		} //if enabled
+		}//if enemy hit
 
 	}
 
 	//================FOR CONTROLLING COLLIDER==============
 
 	/// <summary>
-	///   This function clears the "targetsHit" list.
-	///   This will be called at the end of an attack
+	/// Disables the collider attached to 
+	/// to the same object as this script.
+	/// Also clears the list of targets that
+	/// were hit
 	/// </summary>
-	public void AttackHasEnded() {
-		attackHasEnded = true;
+	public void DisableCollider() {
+		if (attachedCollider != null)
+			attachedCollider.enabled = false;
+
+		//Clear list of targets hit
 		if (targetsHit != null)
-		    targetsHit.Clear ();
+			targetsHit.Clear ();
 	}
 
-	public void Disable() {
-		enabled = false;
-	}
-
-	public void Enable() {
-		enabled = true;
-		attackHasEnded = false;
+	/// <summary>
+	/// Enables the collider attached
+	/// to the same object as this script.
+	/// </summary>
+	public void EnableCollider() {
+		attachedCollider.enabled = true;
 	}
 }

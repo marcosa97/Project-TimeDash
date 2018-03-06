@@ -57,10 +57,10 @@ public class AbilityChargedAttack : MonoBehaviour {
 		colliderLeft = GameObject.Find ("cAttack Collider Left").GetComponent<SwordCollider> ();
 		colliderRight = GameObject.Find ("cAttack Collider Right").GetComponent<SwordCollider> ();
 
-		colliderUp.Disable ();
-		colliderDown.Disable ();
-		colliderLeft.Disable ();
-		colliderRight.Disable ();
+		colliderUp.DisableCollider();
+		colliderDown.DisableCollider ();
+		colliderRight.DisableCollider ();
+		colliderLeft.DisableCollider ();
 	}
 
 	private void ActivateCorrespondingCollider(EightDirections dir) {
@@ -68,7 +68,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 		case EightDirections.North:
 			//Debug.Log ("North");
 			//Activate RightUp collider and animation
-			colliderUp.Enable();
+			colliderUp.EnableCollider();
 			break;
 		case EightDirections.NorthEast:
 			//Debug.Log ("North East");
@@ -76,7 +76,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 			break;
 		case EightDirections.East:
 			//Debug.Log ("East");
-			colliderRight.Enable ();
+			colliderRight.EnableCollider ();
 			break;
 		case EightDirections.SouthEast:
 			//Debug.Log ("South East");
@@ -84,7 +84,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 			break;
 		case EightDirections.South:
 			//Debug.Log ("South");
-			colliderDown.Enable ();
+			colliderDown.EnableCollider ();
 			break;
 		case EightDirections.SouthWest:
 			//Debug.Log ("South West");
@@ -92,7 +92,45 @@ public class AbilityChargedAttack : MonoBehaviour {
 			break;
 		case EightDirections.West:
 			//Debug.Log ("West");
-			colliderLeft.Enable ();
+			colliderLeft.EnableCollider ();
+			break;
+		case EightDirections.NorthWest:
+			//Debug.Log ("North West");
+			//swordColliderRight.Enable ();
+			break;
+		}
+	}
+
+	private void DeactivateCorrespondingCollider(EightDirections dir) {
+		switch (dir) {
+		case EightDirections.North:
+			//Debug.Log ("North");
+			//Activate RightUp collider and animation
+			colliderUp.DisableCollider();
+			break;
+		case EightDirections.NorthEast:
+			//Debug.Log ("North East");
+			//swordColliderUp.Enable ();
+			break;
+		case EightDirections.East:
+			//Debug.Log ("East");
+			colliderRight.DisableCollider ();
+			break;
+		case EightDirections.SouthEast:
+			//Debug.Log ("South East");
+			//swordColliderLeft.Enable ();
+			break;
+		case EightDirections.South:
+			//Debug.Log ("South");
+			colliderDown.DisableCollider ();
+			break;
+		case EightDirections.SouthWest:
+			//Debug.Log ("South West");
+			//swordCollider.Enable ();
+			break;
+		case EightDirections.West:
+			//Debug.Log ("West");
+			colliderLeft.DisableCollider ();
 			break;
 		case EightDirections.NorthWest:
 			//Debug.Log ("North West");
@@ -174,14 +212,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 
 			if (timer <= 0f) {
 				//Deactivate collider 
-				colliderUp.AttackHasEnded ();
-				colliderDown.AttackHasEnded ();
-				colliderLeft.AttackHasEnded ();
-				colliderRight.AttackHasEnded ();
-				colliderUp.Disable ();
-				colliderDown.Disable ();
-				colliderLeft.Disable ();
-				colliderRight.Disable ();
+				DeactivateCorrespondingCollider (playerFaceDirection);
 
 				timer = cooldownTime;
 				chargeAttackState = ChargeAttackState.Cooldown;
@@ -211,14 +242,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 		finalAttackForce = baseAttackForce;
 
 		//Deactivate collider 
-		colliderUp.AttackHasEnded ();
-		colliderDown.AttackHasEnded ();
-		colliderLeft.AttackHasEnded ();
-		colliderRight.AttackHasEnded ();
-		colliderUp.Disable ();
-		colliderDown.Disable ();
-		colliderLeft.Disable ();
-		colliderRight.Disable ();
+		DeactivateCorrespondingCollider (playerFaceDirection);
 	}
 
 }
