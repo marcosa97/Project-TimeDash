@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour {
 	private AbilityDodgeRoll dodgeAbility;
 	private AbilitySprintAttack sprintAttackAbility;
 	private AbilityChargedAttack chargedAttackAbility;
+	private AbilityGrab grabAbility;
 	private PlayerStateFlinch flinchState;
 	private HurtInfoReceiver hurtInfo;
 	//public AbilityHyperDash abilityHyperDash;
@@ -44,6 +45,7 @@ public class PlayerController : MonoBehaviour {
 		dodgeAbility = GetComponent<AbilityDodgeRoll> ();
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
 		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
+		grabAbility = GetComponent<AbilityGrab> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
@@ -142,7 +144,7 @@ public class PlayerController : MonoBehaviour {
 			break;
 
 		case PlayerState.Grabbing:
-
+			grabAbility.Grab (ref playerState);
 			break;
 
 		case PlayerState.DodgeRolling:
@@ -201,6 +203,9 @@ public class PlayerController : MonoBehaviour {
 			break;
 		case PlayerState.Flinch:
 			flinchState.ResetState (ref playerState);
+			break;
+		case PlayerState.Grabbing:
+			grabAbility.ResetState (ref playerState);
 			break;
 		//Add cases for grabbing and other states 
 		}

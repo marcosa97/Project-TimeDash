@@ -183,8 +183,11 @@ public class AbilityBasicMovement : MonoBehaviour {
 			playerState = PlayerState.Shielding;
 		}
 		//Handle input for Hyper Dash -> Right mouse click
-		else if (Input.GetMouseButtonDown(1)) {
+		else if (Input.GetMouseButtonDown (1)) {
 			playerState = PlayerState.HyperDashing;
+		} 
+		else if (Input.GetButtonDown ("GrabPS4")) {
+			playerState = PlayerState.Grabbing;
 		}
 		//Handle Sonic Attack (V or LEFT SHIFT button)
 	}
