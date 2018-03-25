@@ -68,7 +68,7 @@ public class OrientationSystem : MonoBehaviour {
 
 	/// <summary>
 	///   Determines the direction (one of the EightDirections) 
-	///   that vector is pointing to. 
+	///   that vector is pointing to. Origin of vector is 0
 	/// </summary>
 	/// <returns>The direction from vector.</returns>
 	/// <param name="dir"> Vector pointing in the direction we want

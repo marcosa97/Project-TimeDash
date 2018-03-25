@@ -23,6 +23,7 @@ public class AbilityGrab : MonoBehaviour {
 	private GrabState grabState;
 	private Animator playerAnimator;
 	private CircleCollider2D grabCollider;
+	private Collider2D enemyCollider; //To ignore collisions during grab
 
 	// Use this for initialization
 	void Start () {
@@ -46,6 +47,8 @@ public class AbilityGrab : MonoBehaviour {
 			grabCollider.enabled = true;
 			playerAnimator.Play("Grab State");
 
+			//Move Hold point to the direction the player is facing
+
 			break;
 
 
@@ -56,8 +59,19 @@ public class AbilityGrab : MonoBehaviour {
 			//if hitbox grabs something
 			if (enemyGrabbed) {
 				//transition to grabbing state
+				grabState = GrabState.HoldingEnemy;
+
 				//Reset stuff
-				//break;
+				grabCollider.enabled = false;
+				enemyGrabbed = false;
+
+				//Play Holding animation
+				playerAnimator.Play("Idle Direction");
+
+				//Ignore collisions between player body and enemy body
+				Physics2D.IgnoreCollision(enemyCollider, GetComponent<BoxCollider2D>(), true );
+
+				break;
 			}
 
 			//Grab move is done, and something was not grabbed
@@ -73,6 +87,14 @@ public class AbilityGrab : MonoBehaviour {
 		case GrabState.HoldingEnemy:
 			timer -= Time.deltaTime;
 
+			if (timer <= 0f) {
+				timer = 0f;
+				grabState = GrabState.Done;
+				grabCollider.enabled = false;
+
+				//Undo ignored collisions
+				Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
+			}
 
 			break;
 
@@ -101,10 +123,34 @@ public class AbilityGrab : MonoBehaviour {
 		timer = holdTime;
 	}
 
+	/// <summary>
+	///    Retreives the enemy body's 2D collider and stores it
+	///    in the class' variable "enemyCollider." This function
+	///    is to be called by the grab collider script, which has
+	///    access to the enemy's collider
+	/// </summary>
+	/// <param name="enemyBody">Enemy body.</param>
+	public void RetreiveEnemyBodyCollider(Collider2D enemyBody) {
+		enemyCollider = enemyBody;
+	}
+
+	//FOR NOW UNUSED
+	/// <summary>
+	///    Makes it so that the physics system ignores collisions 
+	///    between player body and enemy body. To be called by the
+	///    grab collider script (collisions must be set to be ignored
+	///    before we can move the enemy's body to the hold position)
+	/// </summary>
+	public void IgnoreBodyCollisions() {
+		Physics2D.IgnoreCollision(enemyCollider, GetComponent<BoxCollider2D>(), true );
+	}
+
 	public void ResetState(ref PlayerState playerState) {
 		timer = 0f;
 		grabState = GrabState.Setup;
+		enemyGrabbed = false;
 		grabCollider.enabled = false;
+		Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
 		playerState = PlayerState.Default;
 	}
 }
