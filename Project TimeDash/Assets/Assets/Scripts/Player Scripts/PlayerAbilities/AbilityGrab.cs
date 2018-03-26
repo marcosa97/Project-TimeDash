@@ -24,6 +24,7 @@ public class AbilityGrab : MonoBehaviour {
 	private Animator playerAnimator;
 	private CircleCollider2D grabCollider;
 	private Collider2D enemyCollider; //To ignore collisions during grab
+	private Rigidbody2D enemyRigidBody;
 
 	// Use this for initialization
 	void Start () {
@@ -79,6 +80,8 @@ public class AbilityGrab : MonoBehaviour {
 				timer = 0f;
 				grabState = GrabState.Done;
 				grabCollider.enabled = false;
+
+				//Play "let go" animation
 			}
 
 			break;
@@ -86,6 +89,19 @@ public class AbilityGrab : MonoBehaviour {
 
 		case GrabState.HoldingEnemy:
 			timer -= Time.deltaTime;
+
+			//If hit, play hit animation and do damage
+
+			//If throw button is pressed, throw enemy
+			if (Input.GetButtonDown ("GrabPS4")) {
+				//Play throw animation
+
+				enemyRigidBody.AddRelativeForce (Vector2.up * 10, ForceMode2D.Impulse);
+				timer = 0f;
+				grabState = GrabState.Done;
+				grabCollider.enabled = false;
+				Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
+			}
 
 			if (timer <= 0f) {
 				timer = 0f;
@@ -132,6 +148,7 @@ public class AbilityGrab : MonoBehaviour {
 	/// <param name="enemyBody">Enemy body.</param>
 	public void RetreiveEnemyBodyCollider(Collider2D enemyBody) {
 		enemyCollider = enemyBody;
+		enemyRigidBody = enemyBody.gameObject.GetComponent<Rigidbody2D> ();
 	}
 
 	//FOR NOW UNUSED
