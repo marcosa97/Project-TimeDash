@@ -127,6 +127,46 @@ public class OrientationSystem : MonoBehaviour {
 		return EightDirections.South;
 	}
 
+	/// <summary>
+	///    Takes in one of the eight directions a unit in the game can
+	///    be facing (EightDirections) and returns the vector of approx. magnitude
+	///    1 that would correspond to that direction passed in.
+	/// </summary>
+	/// <returns>The orientation vector.</returns>
+	/// <param name="orientation">Orientation.</param>
+	public Vector2 GetOrientationVector(EightDirections orientation) {
+		Vector2 dir = Vector2.zero;
+
+		switch (orientation) {
+		case EightDirections.North:
+			dir = Vector2.up;
+			break;
+		case EightDirections.NorthEast:
+			dir = new Vector2 (.707f, .707f);
+			break;
+		case EightDirections.East:
+			dir = Vector2.right;
+			break;
+		case EightDirections.SouthEast:
+			dir = new Vector2 (.707f, -.707f);
+			break;
+		case EightDirections.South:
+			dir = Vector2.down;
+			break;
+		case EightDirections.SouthWest:
+			dir = new Vector2 (-.707f, -.707f);
+			break;
+		case EightDirections.West:
+			dir = Vector2.left;
+			break;
+		case EightDirections.NorthWest:
+			dir = new Vector2 (-.707f, .707f);
+			break;
+		}
+
+		return dir;
+	}
+
 }
 
 //The way the player faces, split into 45 degree angle slices

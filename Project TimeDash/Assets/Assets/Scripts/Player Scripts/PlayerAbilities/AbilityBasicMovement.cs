@@ -27,12 +27,15 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 	private Vector2 lastMove;
 	private Vector2 attackDirection; //used when an attack happens
+	private EightDirections playerOrientation; //the way the player is facing
+	private OrientationSystem orientationSystem;
 	public bool playerMoving;
 	private bool playerSprinting;
 
 	// Use this for initialization
 	void Start () {
 		playerBody = GetComponent<Rigidbody2D> ();
+		orientationSystem = GetComponent<OrientationSystem> ();
 	}
 
 	public void Idle(ref PlayerState playerState) {
@@ -106,7 +109,10 @@ public class AbilityBasicMovement : MonoBehaviour {
 			playerBody.velocity = new Vector2 (moveHorizontal * moveSpeed, moveVertical * moveSpeed);
 
 			playerMoving = true;
+
+			//Update variables that contain info about movement
 			lastMove = new Vector2 (moveHorizontal, moveVertical);
+			playerOrientation = orientationSystem.DetermineDirectionFromVector (lastMove);
 		} else {
 			playerMoving = false;
 		}
@@ -185,9 +191,10 @@ public class AbilityBasicMovement : MonoBehaviour {
 		//Handle input for Hyper Dash -> Right mouse click
 		else if (Input.GetMouseButtonDown (1)) {
 			playerState = PlayerState.HyperDashing;
-		} 
-		else if (Input.GetButtonDown ("GrabPS4")) {
+		} else if (Input.GetButtonDown ("GrabPS4")) {
 			playerState = PlayerState.Grabbing;
+		} else if (Input.GetButtonDown ("JumpPS4")) {
+			
 		}
 		//Handle Sonic Attack (V or LEFT SHIFT button)
 	}
@@ -231,6 +238,10 @@ public class AbilityBasicMovement : MonoBehaviour {
 		return lastMove;
 	}
 
+	public EightDirections GetFaceDirection() {
+		return playerOrientation;
+	}
+
 	public bool GetPlayerMoving() {
 		return playerMoving;
 	}
@@ -238,6 +249,7 @@ public class AbilityBasicMovement : MonoBehaviour {
 	//To be used by other classes when they update the last move (like Attacks)
 	public void UpdateLastMove(Vector2 newLastMove) {
 		lastMove = newLastMove;
+		playerOrientation = orientationSystem.DetermineDirectionFromVector (lastMove);
 	}
 
 	//Gets the position of where the mouse is in the world

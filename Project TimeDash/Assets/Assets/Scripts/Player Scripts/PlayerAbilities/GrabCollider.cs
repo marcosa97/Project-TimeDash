@@ -14,7 +14,8 @@ public class GrabCollider : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Enemy Unit Medium") {
+		//CHANGE THIS TO "Enemy Unit Medium" ONLY WHEN DONE TESTING PUNCHING BAG
+		if (other.tag == "Enemy Unit Medium" || other.tag == "Interactable Object") {
 			//Tell the enemy unit to switch to "grabbed" state
 			//  and also get info from enemy, like how long it can be held for
 

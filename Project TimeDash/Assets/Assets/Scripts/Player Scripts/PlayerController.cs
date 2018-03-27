@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		//Physics.gravity = new Vector3 (0, 0, -9.81f);
 		anim = GetComponent<Animator> ();
 		basicMovement = GetComponent<AbilityBasicMovement> ();
 		attackAbility = GetComponent<AttackAbility> ();

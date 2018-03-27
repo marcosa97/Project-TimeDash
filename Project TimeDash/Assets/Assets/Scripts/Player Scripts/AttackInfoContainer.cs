@@ -46,5 +46,6 @@ public enum AttackID {
 	Null,
 	NormalAttack,
 	ChargedAttack,
-	SprintAttack
+	SprintAttack,
+	Grab
 }

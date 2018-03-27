@@ -9,12 +9,14 @@ public class AbilityGrab : MonoBehaviour {
 		Setup,
 		Grab,
 		HoldingEnemy,
+		ThrowingEnemy,
 		Done
 		//HoldingItem
 	}
 
 	//Public Settings
 	public float grabTime;
+	public float throwTime;
 
 	//References and variables needed
 	private float timer; //how long a grab animation takes
@@ -25,6 +27,10 @@ public class AbilityGrab : MonoBehaviour {
 	private CircleCollider2D grabCollider;
 	private Collider2D enemyCollider; //To ignore collisions during grab
 	private Rigidbody2D enemyRigidBody;
+	private OrientationSystem orientationSystem;
+	private AbilityBasicMovement moveInfo; 
+
+	private AttackInfoContainer playerAttackInfo;
 
 	// Use this for initialization
 	void Start () {
@@ -34,6 +40,9 @@ public class AbilityGrab : MonoBehaviour {
 		grabCollider.enabled = false;
 		grabState = GrabState.Setup;
 		enemyGrabbed = false;
+		playerAttackInfo = GetComponent<AttackInfoContainer> ();
+		orientationSystem = GetComponent<OrientationSystem> ();
+		moveInfo = GetComponent<AbilityBasicMovement> (); 
 	}
 
 	public void Grab(ref PlayerState playerState) {
@@ -69,6 +78,10 @@ public class AbilityGrab : MonoBehaviour {
 				//Play Holding animation
 				playerAnimator.Play("Idle Direction");
 
+				//Update Player's Attack Info Container 
+				Vector2 dir = orientationSystem.GetOrientationVector( moveInfo.GetFaceDirection() );
+				playerAttackInfo.UpdateAttackInfo (AttackID.Grab, 10, dir);
+
 				//Ignore collisions between player body and enemy body
 				Physics2D.IgnoreCollision(enemyCollider, GetComponent<BoxCollider2D>(), true );
 
@@ -96,11 +109,14 @@ public class AbilityGrab : MonoBehaviour {
 			if (Input.GetButtonDown ("GrabPS4")) {
 				//Play throw animation
 
-				enemyRigidBody.AddRelativeForce (Vector2.up * 10, ForceMode2D.Impulse);
-				timer = 0f;
-				grabState = GrabState.Done;
+				//Switch to throw state
+				grabState = GrabState.ThrowingEnemy;
+
+				enemyRigidBody.AddRelativeForce (playerAttackInfo.direction * 10, ForceMode2D.Impulse);
+				timer = throwTime;
 				grabCollider.enabled = false;
 				Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
+				break;
 			}
 
 			if (timer <= 0f) {
@@ -114,6 +130,16 @@ public class AbilityGrab : MonoBehaviour {
 
 			break;
 
+		
+		case GrabState.ThrowingEnemy:
+			timer -= Time.deltaTime;
+
+			if (timer <= 0f) {
+				timer = 0f;
+				grabState = GrabState.Done;
+			}
+
+			break;
 		
 		case GrabState.Done:
 			//Reset
