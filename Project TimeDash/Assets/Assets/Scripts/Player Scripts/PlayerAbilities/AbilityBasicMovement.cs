@@ -92,17 +92,26 @@ public class AbilityBasicMovement : MonoBehaviour {
 	}
 
 	//===============HELPER FUNCTIONS THAT DO THE MOVING=======================
+	//NOTE: "acceleration" is useless now that I'm using raw input
 	//Handles player movement from user input
 	private void MovePlayer() {
 		//Get player input
-		float moveHorizontal = (Input.GetAxis ("Horizontal")) * acceleration;
-		float moveVertical = (Input.GetAxis ("Vertical")) * acceleration;
+		float moveHorizontal = (Input.GetAxisRaw ("Horizontal")) * acceleration;
+		float moveVertical = (Input.GetAxisRaw ("Vertical")) * acceleration;
 
 		Sprint (ref moveHorizontal, ref moveVertical);
 
 		//Move the Player according to raw input
 		//if (moveHorizontal > 0.5f || moveHorizontal < -0.5f || moveVertical > 0.5f || moveVertical < -0.5f) {
 		if (moveHorizontal > 0f || moveHorizontal < -0f || moveVertical > 0f || moveVertical < -0f) {
+			//To make sure diagonal movement isn't faster
+			Vector2 moveDir = new Vector2 (moveHorizontal, moveVertical);
+			if (moveDir.magnitude > 1f) {
+				moveDir.Normalize ();
+				moveHorizontal = moveDir.x;
+				moveVertical = moveDir.y;
+			}
+
 			//Move player
 			Mathf.Clamp (moveVertical, -1f, 1f);
 			Mathf.Clamp (moveHorizontal, -1f, 1f);

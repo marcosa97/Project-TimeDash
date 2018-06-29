@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour {
 	//Static -> all objects that have this script will use this playerExists instance
 	private static bool playerExists;
 
-	//Structures that handle each ability's logic
+	//Structures that handle each state's logic (abilities, movement)
 	private AbilityBasicMovement basicMovement;
 	private DashAbility dashAbility;
 	private AttackAbility attackAbility;
@@ -186,6 +186,7 @@ public class PlayerController : MonoBehaviour {
 		switch (playerState) {
 		case PlayerState.Default:
 			//Stay in this state, so do nothing
+			basicMovement.ResetState (ref playerState);
 			break;
 		case PlayerState.Moving:
 			basicMovement.ResetState (ref playerState);
