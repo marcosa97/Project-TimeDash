@@ -15,7 +15,7 @@ public class TurretController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		firePoint = transform.FindChild ("FirePoint");
+		firePoint = transform.Find ("FirePoint");
 		if (firePoint == null) {
 			Debug.LogError ("No Firepoint!");
 		}
