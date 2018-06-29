@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EZCameraShake;
 
 //NOTE: Sword collider will be a Trigger collider because that way it can ignore the Player's
 //        collision box and it won't push the player away either.
@@ -34,7 +35,7 @@ public class SwordCollider : MonoBehaviour {
 
 	// @other: could be an enemy, object, or switch
 	void OnTriggerEnter2D (Collider2D other) {
-		if (other.tag == "Interactable Object") {
+		if (other.tag == "Interactable Object" || other.tag == "Enemy Unit Medium") {
 			//if the enemy that was attacked hasn't already been damaged during this attack
 			// AKA, Hit Registered
 			if (!targetsHit.Contains (other.gameObject.GetInstanceID ())) {
@@ -49,6 +50,9 @@ public class SwordCollider : MonoBehaviour {
 
 				//Call Time.Timescale using SendMessage or a reference to time manager
 				timeManager.StartCoroutine("HitStop");
+
+				//Camera shake
+				CameraShaker.Instance.ShakeOnce(.3f, 2f, .1f, .1f);
 
 				//Instantiate particle effect
 				var effect = Instantiate(hitParticles, other.transform.position, other.transform.rotation);

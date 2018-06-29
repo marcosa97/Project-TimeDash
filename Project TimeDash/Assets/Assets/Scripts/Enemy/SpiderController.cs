@@ -10,6 +10,8 @@ public class SpiderController : MonoBehaviour {
 	public float baseAttackForce = 0f;
 	public LayerMask whatToHit;
 	public float pursuitRange;
+	public float flinchTime;
+	public float searchTime;
 
 	float timeToFire = 0f;
 	Transform firePoint;
@@ -18,6 +20,8 @@ public class SpiderController : MonoBehaviour {
 	public float patrolSpeed;
 	public float pursuitSpeed;
 	[SerializeField]
+	private float hurtTimer;
+	private float searchTimer;
 	private float waitTime;
 	public float startWaitTime;
 
@@ -74,7 +78,15 @@ public class SpiderController : MonoBehaviour {
 			Pursuit ();
 			break;
 
+		case SpiderState.Searching:
+			Search ();
+			break;
+
 		case SpiderState.Attacking:
+			break;
+
+		case SpiderState.Hurt:
+			Hurt ();
 			break;
 		}
 	}
@@ -91,7 +103,15 @@ public class SpiderController : MonoBehaviour {
 			PursuitMovement ();
 			break;
 
+		case SpiderState.Searching:
+			//Do nothing for now
+			break;
+
 		case SpiderState.Attacking:
+			break;
+
+		case SpiderState.Hurt:
+			//Do nothing
 			break;
 		}
 	}
@@ -100,12 +120,35 @@ public class SpiderController : MonoBehaviour {
 	/// FUNCTIONS FOR HANDLING STATES ///
 	///===============================///
 
+	//In the hurt state, this enemy is flinching and won't move
+	void Hurt() {
+		hurtTimer -= Time.deltaTime;
+
+		if (hurtTimer <= 0f) {
+			hurtTimer = 0f;
+			spiderState = SpiderState.Pursuit;
+		}
+	}
+
+	//If the player runs away from the enemy, the enemy 
+	//will stop pursuing and pause for a bit, searching for
+	//the player and then return roaming if player not found
+	void Search() {
+		searchTimer -= Time.deltaTime;
+
+		if (searchTimer <= 0f) {
+			searchTimer = 0f;
+			spiderState = SpiderState.Roaming;
+		}
+	}
+
 	void Pursuit() {
 		//Check radius to see if player out of range
 		float distance = Vector2.Distance (transform.position, player.transform.position);
 		if (distance > pursuitRange) { 
 			//Player has escaped enemy
-			spiderState = SpiderState.Roaming;
+			spiderState = SpiderState.Searching;
+			searchTimer = searchTime;
 		}
 	}
 
@@ -167,6 +210,17 @@ public class SpiderController : MonoBehaviour {
 		}
 	}
 
+	//@obj: contains attack direction and attack force
+	void ObjectHit(AttackInfoContainer obj) {
+		Debug.Log ("ENEMY HIT");
+
+		//Change state to hurt
+		hurtTimer = flinchTime;
+		spiderState = SpiderState.Hurt;
+
+		rb.AddForce (obj.direction * obj.force );
+	}
+
 	//For debugging
 	void OnDrawGizmosSelected()
 	{
@@ -180,5 +234,7 @@ public class SpiderController : MonoBehaviour {
 public enum SpiderState {
 	Roaming,
 	Pursuit,
-	Attacking
+	Searching, //When enemy loses sight of player
+	Attacking,
+	Hurt
 }
