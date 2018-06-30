@@ -12,7 +12,13 @@ public class AttackInfoContainer : MonoBehaviour {
 	
 	public AttackID AttackID;
 	public AttackType attackType;
-	public Vector2 direction; //Direction vector relative to the entity performing the attack (magnitude = 1)
+
+	//NOTES: 
+	//@ The attack direction * force gets passed into AddForce
+	//@ Direction vector relative to the entity 
+	//    performing the attack (magnitude = 1)
+	//@ Direction is in the format (1,0), (0,1), (-1, 0), (0,-1), etc.
+	public Vector2 direction; 
 	public float force; //To determine knockback, unmodified by power ups
 	//public int damage;
 

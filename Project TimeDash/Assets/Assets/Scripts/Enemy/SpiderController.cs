@@ -3,15 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpiderController : MonoBehaviour {
+	//Substate for pursuit movement
+	private enum PursuitState {
+		Chasing,
+		Stopped,
+		Retreating
+	}
+
 	public SpiderState spiderState;
+	private PursuitState pState;
 
 	//public settings
 	public float fireRate = 0f;
 	public float baseAttackForce = 0f;
 	public LayerMask whatToHit;
 	public float pursuitRange;
+	public float stoppingDistance; //for when approaching player
+	public float retreatDistance; //When player gets too close to unit
 	public float flinchTime;
 	public float searchTime;
+	public float timeBetweenShots;
 
 	float timeToFire = 0f;
 	Transform firePoint;
@@ -22,13 +33,15 @@ public class SpiderController : MonoBehaviour {
 	[SerializeField]
 	private float hurtTimer;
 	private float searchTimer;
-	private float waitTime;
+	private float waitTimer;
+	private float projectileTimer;
 	public float startWaitTime;
 
 	//List of spots that the enemy can move to when patroling
 	public Transform[] moveSpots;
 	private int targetSpot;
 
+	public GameObject projectile;
 	private GameObject player;
 	private Rigidbody2D rb;
 	private AttackInfoContainer attackInfo; 
@@ -51,7 +64,9 @@ public class SpiderController : MonoBehaviour {
 
 		//Starting state
 		spiderState = SpiderState.Roaming;
-		waitTime = startWaitTime;
+		pState = PursuitState.Chasing;
+		waitTimer = startWaitTime;
+		projectileTimer = 0f;
 		//targetSpot = Random.Range (0, moveSpots.Length);
 		targetSpot = 0; //first spot
 	}
@@ -140,6 +155,14 @@ public class SpiderController : MonoBehaviour {
 			searchTimer = 0f;
 			spiderState = SpiderState.Roaming;
 		}
+
+		//Check if player is within range
+		float distance = Vector2.Distance (transform.position, player.transform.position);
+		if (distance <= pursuitRange) { 
+			//If player is within range, switch to pursuit state
+			spiderState = SpiderState.Pursuit;
+			searchTimer = 0f;
+		}
 	}
 
 	void Pursuit() {
@@ -148,7 +171,28 @@ public class SpiderController : MonoBehaviour {
 		if (distance > pursuitRange) { 
 			//Player has escaped enemy
 			spiderState = SpiderState.Searching;
+			pState = PursuitState.Chasing; //reset
+			projectileTimer = 0f;
 			searchTimer = searchTime;
+			return;
+		}
+
+		//Shoot projectile
+		ShootProjectile();
+
+		//Check if we are within attacking distance and not too close to player
+		if (distance <= stoppingDistance && distance >= retreatDistance) {
+			//Stop moving for a better attack shot
+			pState = PursuitState.Stopped;
+
+			//Face the target as well
+
+		} else if (distance < retreatDistance) {
+			//If too close to player, retreat
+			pState = PursuitState.Retreating;
+		} else {
+			//Keep chasing
+			pState = PursuitState.Chasing;
 		}
 	}
 
@@ -162,10 +206,26 @@ public class SpiderController : MonoBehaviour {
 	}
 
 	void PursuitMovement() {
-		//Follow player
-		Vector2 moveDirection = (Vector2)player.transform.position - (Vector2)transform.position;
-		moveDirection.Normalize();
-		rb.velocity = moveDirection * pursuitSpeed;
+		Vector2 moveDirection = Vector2.zero;
+
+		switch (pState) {
+		case PursuitState.Chasing:
+			//Follow player
+			moveDirection = (Vector2)player.transform.position - (Vector2)transform.position;
+			moveDirection.Normalize();
+			rb.velocity = moveDirection * pursuitSpeed;
+			break;
+
+		case PursuitState.Stopped:
+			rb.velocity = Vector2.zero;
+			break;
+
+		case PursuitState.Retreating:
+			moveDirection = (Vector2)player.transform.position - (Vector2)transform.position;
+			moveDirection.Normalize();
+			rb.velocity = moveDirection * -pursuitSpeed;
+			break;
+		}
 	}
 
 	//Called in FixedUpdate cuz we deal with rigidbody movement
@@ -177,18 +237,30 @@ public class SpiderController : MonoBehaviour {
 		//Handle patrol movement timings
 		//If enemy has reached move spot
 		if (Vector2.Distance(transform.position, moveSpots[targetSpot].position) < 0.2f) {
-			if (waitTime <= 0f) {
+			if (waitTimer <= 0f) {
 				//targetSpot = Random.Range (0, moveSpots.Length);
 				//Cycle through move spots in order
 				targetSpot = ( targetSpot + 1) % moveSpots.Length;
-				waitTime = startWaitTime;
+				waitTimer = startWaitTime;
 			} else {
 				//Time.deltaTime is already fixedDeltaTime in FixedUpdate
-				waitTime -= Time.fixedDeltaTime;
+				waitTimer -= Time.fixedDeltaTime;
 			}
 		}
 	}
 
+	//Shoots projectiles when in "Pursuit" state
+	void ShootProjectile() {
+		if (projectileTimer <= 0f) {
+			//Shoot
+			Instantiate(projectile, transform.position, Quaternion.identity);
+			projectileTimer = timeBetweenShots;
+		} else {
+			projectileTimer -= Time.deltaTime;
+		}
+	}
+
+	//OLD FUNCTION
 	void Shoot() {
 		//Debug.Log ("Turret Fire!");
 		Vector2 firePointPosition = new Vector2 (firePoint.position.x, firePoint.position.y);
