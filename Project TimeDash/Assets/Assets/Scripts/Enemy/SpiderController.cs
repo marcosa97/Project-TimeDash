@@ -14,7 +14,6 @@ public class SpiderController : MonoBehaviour {
 	private PursuitState pState;
 
 	//public settings
-	public float fireRate = 0f;
 	public float baseAttackForce = 0f;
 	public LayerMask whatToHit;
 	public float pursuitRange;
@@ -24,7 +23,6 @@ public class SpiderController : MonoBehaviour {
 	public float searchTime;
 	public float timeBetweenShots;
 
-	float timeToFire = 0f;
 	Transform firePoint;
 
 	//For handling patrol/random movement
@@ -46,7 +44,7 @@ public class SpiderController : MonoBehaviour {
 	private Rigidbody2D rb;
 	private AttackInfoContainer attackInfo; 
 
-	// Use this for initialization
+	// Use this for initialization 
 	void Start () {
 		firePoint = transform.Find ("FirePoint");
 		if (firePoint == null) {
@@ -78,10 +76,6 @@ public class SpiderController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (Time.time > timeToFire) {
-			timeToFire = Time.time + (1 / fireRate);
-			Shoot ();
-		}
 
 		//State machine goes here
 		switch (spiderState) {
@@ -257,28 +251,6 @@ public class SpiderController : MonoBehaviour {
 			projectileTimer = timeBetweenShots;
 		} else {
 			projectileTimer -= Time.deltaTime;
-		}
-	}
-
-	//OLD FUNCTION
-	void Shoot() {
-		//Debug.Log ("Turret Fire!");
-		Vector2 firePointPosition = new Vector2 (firePoint.position.x, firePoint.position.y);
-		RaycastHit2D hit = Physics2D.Raycast (firePointPosition, Vector2.down, Mathf.Infinity, whatToHit);
-		Debug.DrawRay (firePointPosition, Vector2.down);
-
-		if (hit.collider != null) {
-			//Debug.Log ("Raycast Hit");
-			Debug.DrawLine (firePointPosition, hit.point, Color.red);
-			Debug.Log ("We hit " + hit.collider.name);
-
-			//Check if the object hit was the player or the shield
-			if (hit.collider.tag == "Player") {
-				hit.collider.SendMessage ("HurtPlayer", attackInfo); 
-			} else if (hit.collider.tag == "Player Shield") {
-
-			}
-
 		}
 	}
 
