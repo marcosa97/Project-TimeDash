@@ -193,7 +193,9 @@ public class AbilityGrab : MonoBehaviour {
 		grabState = GrabState.Setup;
 		enemyGrabbed = false;
 		grabCollider.enabled = false;
-		Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
+		if (enemyCollider != null) {
+			Physics2D.IgnoreCollision (enemyCollider, GetComponent<BoxCollider2D> (), false);
+		}
 		playerState = PlayerState.Default;
 	}
 }

@@ -14,21 +14,22 @@ public class SpiderController : MonoBehaviour {
 	private PursuitState pState;
 
 	//public settings
+	[Header ("Attack Settings")]
 	public float baseAttackForce = 0f;
+	public float timeBetweenShots;
 	public LayerMask whatToHit;
+	[Header ("Movement Settings")]
 	public float pursuitRange;
 	public float stoppingDistance; //for when approaching player
 	public float retreatDistance; //When player gets too close to unit
 	public float flinchTime;
 	public float searchTime;
-	public float timeBetweenShots;
 
 	Transform firePoint;
 
 	//For handling patrol/random movement
 	public float patrolSpeed;
 	public float pursuitSpeed;
-	[SerializeField]
 	private float hurtTimer;
 	private float searchTimer;
 	private float waitTimer;

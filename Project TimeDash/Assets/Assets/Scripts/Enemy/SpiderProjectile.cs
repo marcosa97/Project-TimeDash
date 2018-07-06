@@ -61,11 +61,11 @@ public class SpiderProjectile : MonoBehaviour {
 		}
 
 		DestroyProjectile ();
+		Debug.Log (other.tag);
 
-		if (other.tag == "Player" || other.tag == "Player Shield") {
-			Debug.Log (other.tag);
+		if (other.tag == "Player" || other.tag == "Player Shield" || other.tag == "Player Grab") {
 
-			if (other.tag == "Player") {
+			if (other.tag == "Player" || other.tag == "Player Grab") {
 				//Hurt player
 				playerController.HurtPlayer (attackInfo);
 			} else {
