@@ -4,9 +4,14 @@ using UnityEngine;
 
 public class DashEnemyController : EnemyParentBase {
 
+	//To keep track of time and other stuff
+	private float chargeTimer; //for charging attack
+
+
 	// Use this for initialization
 	protected override void Start () {
 		base.Start ();
+		chargeTimer = 0f;
 		Debug.Log ("Derived Start");
 	}
 		
@@ -30,8 +35,7 @@ public class DashEnemyController : EnemyParentBase {
 	//protected virtual void FixedAttack() {}
 	//protected virtual void FixedHurt() {}
 
-
-
+	/*
 	protected override void ObjectHit(AttackInfoContainer obj) {
 		Debug.Log ("DASH ENEMY HIT");
 
@@ -39,4 +43,5 @@ public class DashEnemyController : EnemyParentBase {
 
 		rb.AddForce (obj.direction * obj.force);
 	}
+	*/
 }
