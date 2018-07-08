@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class DashEnemyController : EnemyParentBase {
 
-	//To keep track of time and other stuff
-	private float chargeTimer; //for charging attack
-
-
 	// Use this for initialization
 	protected override void Start () {
 		base.Start ();
-		chargeTimer = 0f;
 		Debug.Log ("Derived Start");
 	}
 		
@@ -36,12 +31,38 @@ public class DashEnemyController : EnemyParentBase {
 	//protected virtual void FixedHurt() {}
 
 	/*
-	protected override void ObjectHit(AttackInfoContainer obj) {
-		Debug.Log ("DASH ENEMY HIT");
+	protected override void Pursuit() {
+		//Check radius to see if player got out of range
+		float distance = Vector2.Distance (transform.position, playerTransform.position);
+		if (distance > pursuitRange) {
+			//Player has escaped enemy
+			enemyState = EnemyBaseState.Searching;
+			pursuitState = PursuitState.Chasing; //reset
+			timer = searchTime;
+		}
 
-		//Change to hurt state
+		//Handle pursuit substate transitions
+		//Check if we are within attacking distance and not too close to player
+		if (distance <= stoppingDistance && distance >= retreatDistance) {
+			//Begin charging an attack
+			pursuitState = PursuitState.Stopped;
+			enemyState = EnemyBaseState.ChargingAttack;
+			timer = 0f; //reset
+			attackTimer = attackChargeTime;
 
-		rb.AddForce (obj.direction * obj.force);
+			//Face the target as well
+
+		} else if (distance < retreatDistance) {
+			//If too close to player, retreat
+			pursuitState = PursuitState.Retreating;
+		} else {
+			//Keep chasing
+			pursuitState = PursuitState.Chasing;
+		}
 	}
 	*/
+
+	protected override void FixedAttack() {
+		rb.velocity = attackInfo.direction * attackSpeed;
+	}
 }

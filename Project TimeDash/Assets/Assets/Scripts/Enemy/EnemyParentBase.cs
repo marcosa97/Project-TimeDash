@@ -14,8 +14,24 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		//Cutscene
 	}
 
+	//Substates for pursuit state
+	protected enum PursuitState {
+		Chasing,
+		Stopped,
+		Retreating
+	}
+
+	//Substates for attackState
+	protected enum AttackState {
+		Attacking,
+		Cooldown
+	}
+
 	[SerializeField]
-	protected EnemyBaseState enemyState; 
+	protected EnemyBaseState enemyState;
+	[SerializeField]
+	protected PursuitState pursuitState;
+	protected AttackState attackState;
 
 	[Header ("Attack Settings")]
 	public float baseAttackForce = 0f; //Assuming one attack
@@ -25,6 +41,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	[Header ("Speed")]
 	public float roamSpeed;
 	public float pursuitSpeed;
+	public float attackSpeed;
 	[Header ("Ranges")]
 	public float pursuitRange;
 	public float stoppingDistance; //for when approaching player
@@ -33,6 +50,9 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	public float roamPauseTime = 1.5f; //Time to pause movement for when roaming
 	public float flinchTime = 0.5f;
 	public float searchTime = 3f;
+	public float attackChargeTime = 0.5f;
+	public float attackDurationTime = 0.5f;
+	public float attackCooldownTime = 0.3f;
 
 	//List of spots that the enemy can move to when patroling
 	public Transform[] moveSpotsArray;
@@ -42,6 +62,11 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	protected Transform playerTransform;
 	protected AttackInfoContainer attackInfo;
 	protected float timer;
+	//Note: Will need a separate timer for charging and 
+	//      executing attacks because enemy state may be 
+	//      paused or interrupted when being hurt (enemy flinches/
+	//      stops moving for a bit). 
+	protected float attackTimer; 
 
 	//Reference to player's health script
 	//Reference to player's controller
@@ -63,7 +88,10 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		playerTransform = GameObject.Find ("Player").GetComponent<Transform> ();
 		rb = GetComponent<Rigidbody2D> ();
 		enemyState = EnemyBaseState.Roaming;
+		pursuitState = PursuitState.Chasing;
+		attackState = AttackState.Attacking;
 		timer = 0f;
+		attackTimer = 0f;
 	}
 
 	//NOTE: Update() will be used for checking 
@@ -151,6 +179,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		if (distance > pursuitRange) {
 			//Player has escaped enemy
 			enemyState = EnemyBaseState.Searching;
+			pursuitState = PursuitState.Chasing; //reset
 			timer = searchTime;
 		}
 
@@ -158,16 +187,20 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		//Check if we are within attacking distance and not too close to player
 		if (distance <= stoppingDistance && distance >= retreatDistance) {
 			//Stop moving for a better attack shot
-			//pState = PursuitState.Stopped;
+			//pursuitState = PursuitState.Stopped;
+			rb.velocity = Vector2.zero; //stop enemy movement
+			enemyState = EnemyBaseState.ChargingAttack;
+			timer = 0f; //reset
+			attackTimer = attackChargeTime;
 
 			//Face the target as well
 
 		} else if (distance < retreatDistance) {
 			//If too close to player, retreat
-			//pState = PursuitState.Retreating;
+			pursuitState = PursuitState.Retreating;
 		} else {
 			//Keep chasing
-			//pState = PursuitState.Chasing;
+			pursuitState = PursuitState.Chasing;
 		}
 	}
 
@@ -187,8 +220,54 @@ public abstract class EnemyParentBase : MonoBehaviour {
 			timer = 0f;
 		}
 	}
-	protected virtual void ChargeAttack() {}
-	protected virtual void Attack() {}
+	protected virtual void ChargeAttack() {
+		//When attack charge animation is over, 
+		//switch to attack state
+		attackTimer -= Time.deltaTime;
+
+		if (attackTimer <= 0f) {
+			attackTimer = attackDurationTime;
+			enemyState = EnemyBaseState.Attacking;
+
+			//Get player's position at this point in time
+			Vector2 attackDirection = (Vector2)playerTransform.position - (Vector2)transform.position;
+			attackDirection.Normalize ();
+			attackInfo.direction = attackDirection;
+		}
+	}
+	protected virtual void Attack() {
+
+		switch (attackState) {
+		case AttackState.Attacking:
+			//NOTE: Will have to change this so that
+			//      we switch out of this state when 
+			//      the attack animation is over.
+			attackTimer -= Time.deltaTime;
+
+			if (attackTimer <= 0f) {
+				attackTimer = 0f; //reset
+				attackState = AttackState.Cooldown;
+				timer = attackCooldownTime;
+			}
+
+			break;
+
+		case AttackState.Cooldown:
+			//When cooldown animation is over, switch to pursuit state
+			//For this, we use the regular "timer" instead of 
+			//attack timer because cooldown can be interrupted
+			//by the player attacking
+			timer -= Time.deltaTime;
+
+			if (timer <= 0f) {
+				timer = 0f; //reset
+				attackState = AttackState.Attacking; //reset
+				enemyState = EnemyBaseState.Pursuit;
+			}
+
+			break;
+		}
+	}
 	protected virtual void Hurt() {
 		timer -= Time.deltaTime;
 
@@ -198,6 +277,11 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		}
 	}
 
+	//==================================//
+	// FUNCTIONS FOR HANDLING MOVEMENT IN EACH STATE//
+	// Note: State switching has to be  //
+	// handled in derived classes       //
+	//==================================//
 	//These functions are called in FixedUpdate() -> used for
 	//moving enemy and dealing with physics
 
@@ -224,11 +308,28 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	protected virtual void FixedPursuit() {
 		Vector2 moveDirection = Vector2.zero;
 
-		//Handle sub states movement
+		switch (pursuitState) {
+		case PursuitState.Chasing:
+			//Follow player
+			moveDirection = (Vector2)playerTransform.position - (Vector2)transform.position;
+			moveDirection.Normalize ();
+			rb.velocity = moveDirection * pursuitSpeed;
+			break;
+
+		case PursuitState.Stopped:
+			rb.velocity = Vector2.zero;
+			break;
+
+		case PursuitState.Retreating:
+			moveDirection = (Vector2)playerTransform.position - (Vector2)transform.position;
+			moveDirection.Normalize ();
+			rb.velocity = moveDirection * -pursuitSpeed;
+			break;
+		}
 	}
-	protected virtual void FixedSearch() {}
-	protected virtual void FixedChargeAttack() {}
-	protected virtual void FixedAttack() {}
+	protected virtual void FixedSearch() {} //No movement by default
+	protected virtual void FixedChargeAttack() {} //Make it move using root motion
+	protected virtual void FixedAttack() {} //Will probably use root motion for this too
 	protected virtual void FixedHurt() {}
 
 	//Function for when the enemy is hit
