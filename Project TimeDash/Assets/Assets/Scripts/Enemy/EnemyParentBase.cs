@@ -70,6 +70,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 
 	//Reference to player's health script
 	//Reference to player's controller
+	protected PlayerController playerController;
 	//Reference to animator
 
 	// Use this for initialization
@@ -85,7 +86,9 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		attackInfo.direction = Vector2.zero;
 		attackInfo.force = baseAttackForce;
 
-		playerTransform = GameObject.Find ("Player").GetComponent<Transform> ();
+		//playerObject = GameObject.Find ("Player");
+		playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+		playerTransform = GameObject.Find("Player").GetComponent<Transform> ();
 		rb = GetComponent<Rigidbody2D> ();
 		enemyState = EnemyBaseState.Roaming;
 		pursuitState = PursuitState.Chasing;
@@ -163,6 +166,9 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	// Note: State switching has to be  //
 	// handled in derived classes       //
 	//==================================//
+	//NOTE: These are default behaviors. Custom behaviors
+	//      are implemented in derived classes by overriding 
+	//      these functions
 
 	protected virtual void Roam() {
 		//Check radius to see if player is within range
