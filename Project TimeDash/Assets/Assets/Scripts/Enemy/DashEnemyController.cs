@@ -13,7 +13,7 @@ public class DashEnemyController : EnemyParentBase {
 		//pc = playerObject.GetComponent<PlayerController> ();
 		base.Start ();
 		colliderScript = GetComponentInChildren<DashEnemyAttackCollider> ();
-		colliderScript.DisableAttackCollider ();
+		//colliderScript.DisableAttackCollider ();
 		bodyCollider = GetComponent<Collider2D> ();
 		playerCollider = GameObject.Find ("Player").GetComponent<Collider2D> ();
 		Debug.Log ("Derived Start");
@@ -136,7 +136,7 @@ public class DashEnemyController : EnemyParentBase {
 			break;
 		}
 	}
-		
+
 	/*
 	void OnCollisionEnter2D(Collision2D other) {
 		//Only check collisions when in attacking state

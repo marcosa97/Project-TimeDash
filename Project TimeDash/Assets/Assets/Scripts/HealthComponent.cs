@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 //Taken from Unity forums user novashot
 public class HealthComponent : MonoBehaviour {
@@ -9,6 +10,7 @@ public class HealthComponent : MonoBehaviour {
 	[SerializeField]
 	private int currentHealth;
 
+	public Image healthBar;
 	/*
 	public bool canRegen; //can turn regen on or off
 	public int regenAmount; //amount to heal per regen tick
@@ -19,14 +21,14 @@ public class HealthComponent : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		currentHealth = maxHealth;
-
+		healthBar.fillAmount = 1; //full health
 		/*
 		if (canRegen) {
 			InvokeRepeating ("Regen", regenTime, regenTime);
 		} */
 	}
 	
-	public void Hit(int amount) {
+	public void TakeDamage(int amount) {
 		//Cancel regeneration if hit
 		/*
 		if (IsInvoking ("Regen")) {
@@ -34,6 +36,7 @@ public class HealthComponent : MonoBehaviour {
 		} */
 
 		currentHealth -= amount; 
+		healthBar.fillAmount = (float) currentHealth / maxHealth;
 
 		if (currentHealth <= 0) {
 			currentHealth = 0;
@@ -50,6 +53,8 @@ public class HealthComponent : MonoBehaviour {
 	public void Die() {
 		//Destroy or pool game object
 		Debug.Log("Dead");
+
+		Destroy (this.gameObject);
 	}
 
 	/*

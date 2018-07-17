@@ -29,6 +29,8 @@ public abstract class EnemyParentBase : MonoBehaviour {
 
 	[SerializeField]
 	protected EnemyBaseState enemyState;
+	protected EnemyBaseState previousState; //For saving previous state when hurt
+	//Substates 
 	[SerializeField]
 	protected PursuitState pursuitState;
 	protected AttackState attackState;
@@ -54,6 +56,9 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	public float attackDurationTime = 0.5f;
 	public float attackCooldownTime = 0.3f;
 
+	//Reference for health stuff
+	public HealthComponent healthComponent;
+
 	//List of spots that the enemy can move to when patroling
 	public Transform[] moveSpotsArray;
 	protected int targetSpotIndex;
@@ -67,6 +72,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	//      paused or interrupted when being hurt (enemy flinches/
 	//      stops moving for a bit). 
 	protected float attackTimer; 
+	protected float flinchTimer;
 
 	//Reference to player's health script
 	//Reference to player's controller
@@ -95,6 +101,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		attackState = AttackState.Attacking;
 		timer = 0f;
 		attackTimer = 0f;
+		flinchTimer = 0f;
 	}
 
 	//NOTE: Update() will be used for checking 
@@ -275,11 +282,12 @@ public abstract class EnemyParentBase : MonoBehaviour {
 		}
 	}
 	protected virtual void Hurt() {
-		timer -= Time.deltaTime;
+		flinchTimer -= Time.deltaTime;
 
-		if (timer <= 0f) {
-			timer = 0f;
-			enemyState = EnemyBaseState.Pursuit;
+		if (flinchTimer <= 0f) {
+			flinchTimer = 0f;
+			enemyState = previousState;
+			//enemyState = EnemyBaseState.Pursuit;
 		}
 	}
 
@@ -341,10 +349,21 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	//Function for when the enemy is hit
 	protected virtual void ObjectHit(AttackInfoContainer obj) {
 		Debug.Log ("DASH ENEMY HIT");
+		healthComponent.TakeDamage (1);
 
-		//Change to hurt state
-		timer = flinchTime;
-		enemyState = EnemyBaseState.Hurt;
+		//If already in attack state, don't interrupt it
+		if (enemyState != EnemyBaseState.Attacking) {
+
+			//Change to hurt state
+			flinchTimer = flinchTime;
+
+			//If already in hurt state, don't update previous state
+			if (enemyState != EnemyBaseState.Hurt) {
+				previousState = enemyState;
+			}
+			enemyState = EnemyBaseState.Hurt;
+
+		}
 
 		rb.AddForce (obj.direction * obj.force);
 	}
