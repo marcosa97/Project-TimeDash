@@ -15,8 +15,10 @@ public class AbilityGrab : MonoBehaviour {
 	}
 
 	//Public Settings
+	[Header ("Grab Settings")]
 	public float grabTime;
 	public float throwTime;
+	public int damageAmount;
 
 	//References and variables needed
 	private float timer; //how long a grab animation takes
@@ -80,7 +82,7 @@ public class AbilityGrab : MonoBehaviour {
 
 				//Update Player's Attack Info Container 
 				Vector2 dir = orientationSystem.GetOrientationVector( moveInfo.GetFaceDirection() );
-				playerAttackInfo.UpdateAttackInfo (AttackID.Grab, 10, dir);
+				playerAttackInfo.UpdateAttackInfo (AttackID.Grab, 10, dir, damageAmount);
 
 				//Ignore collisions between player body and enemy body
 				Physics2D.IgnoreCollision(enemyCollider, GetComponent<BoxCollider2D>(), true );

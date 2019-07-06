@@ -349,7 +349,7 @@ public abstract class EnemyParentBase : MonoBehaviour {
 	//Function for when the enemy is hit
 	protected virtual void ObjectHit(AttackInfoContainer obj) {
 		Debug.Log ("DASH ENEMY HIT");
-		healthComponent.TakeDamage (1);
+		healthComponent.TakeDamage (obj.damage);
 
 		//If already in attack state, don't interrupt it
 		if (enemyState != EnemyBaseState.Attacking) {

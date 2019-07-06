@@ -12,11 +12,13 @@ public class AbilityChargedAttack : MonoBehaviour {
 	}
 
 	//public settings
+	[Header ("Charged Attack Settings")]
 	public float maxChargeTime;
 	public float attackTime;
 	public float cooldownTime;
 	public float baseAttackForce;
 	public int chargeMultiplier;
+	public int damageAmount;
 
 	//References and variables needed
 	private float timer;
@@ -188,7 +190,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 				ActivateCorrespondingCollider (playerFaceDirection); 
 	
 				playerAttackInfo.UpdateAttackInfo (AttackID.ChargedAttack, finalAttackForce,
-					movementInfo.GetLastMove ().normalized);
+					movementInfo.GetLastMove ().normalized, damageAmount);
 			}
 
 			//If button is still being held down

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DashEnemyAttackCollider : MonoBehaviour {
 
+	public DashEnemyController controllerScript;
 	private PlayerController playerController;
 	private AttackInfoContainer attackInfo;
 	private CircleCollider2D attackCollider;
@@ -26,6 +27,14 @@ public class DashEnemyAttackCollider : MonoBehaviour {
 			Debug.Log ("Dash hit player");
 			playerController.HurtPlayer (attackInfo);
 			hitPlayer = true;
+			return;
+		}
+
+		//If the player's shield was hit, stop attack
+		if (other.tag == "Player Shield") {
+			//controllerScript.AttackBlocked ();
+
+			//Instantiate some particles
 		}
 	}
 

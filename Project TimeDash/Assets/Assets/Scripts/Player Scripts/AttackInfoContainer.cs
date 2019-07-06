@@ -20,7 +20,7 @@ public class AttackInfoContainer : MonoBehaviour {
 	//@ Direction is in the format (1,0), (0,1), (-1, 0), (0,-1), etc.
 	public Vector2 direction; 
 	public float force; //To determine knockback, unmodified by power ups
-	//public int damage;
+	public int damage;
 
 	//Default constructor
 	public AttackInfoContainer() {
@@ -28,13 +28,15 @@ public class AttackInfoContainer : MonoBehaviour {
 		attackType = AttackType.Null;
 		direction = Vector2.zero;
 		force = 0f;
+		damage = 0;
 	}
 
 	//Updates variables of this container
-	public void UpdateAttackInfo(AttackID ID, float f, Vector2 dir) { 
+	public void UpdateAttackInfo(AttackID ID, float f, Vector2 dir, int dam) { 
 		AttackID = ID;
 		force = f; 
 		direction = dir;
+		damage = dam;
 	}
 	
 }

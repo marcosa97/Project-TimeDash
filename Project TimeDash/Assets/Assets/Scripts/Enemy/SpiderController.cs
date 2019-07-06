@@ -25,8 +25,6 @@ public class SpiderController : MonoBehaviour {
 	public float flinchTime;
 	public float searchTime;
 
-	Transform firePoint;
-
 	//For handling patrol/random movement
 	public float patrolSpeed;
 	public float pursuitSpeed;
@@ -35,6 +33,8 @@ public class SpiderController : MonoBehaviour {
 	private float waitTimer;
 	private float projectileTimer;
 	public float startWaitTime;
+
+	public HealthComponent healthComponent;
 
 	//List of spots that the enemy can move to when patroling
 	public Transform[] moveSpots;
@@ -47,10 +47,6 @@ public class SpiderController : MonoBehaviour {
 
 	// Use this for initialization 
 	void Start () {
-		firePoint = transform.Find ("FirePoint");
-		if (firePoint == null) {
-			Debug.LogError ("No Firepoint!");
-		}
 
 		attackInfo = GetComponent<AttackInfoContainer> (); 
 		attackInfo.attackType = AttackType.MeleeWeakAttack;
@@ -258,6 +254,7 @@ public class SpiderController : MonoBehaviour {
 	//@obj: contains attack direction and attack force
 	void ObjectHit(AttackInfoContainer obj) {
 		Debug.Log ("ENEMY HIT");
+		healthComponent.TakeDamage (obj.damage);
 
 		//Change state to hurt
 		hurtTimer = flinchTime;

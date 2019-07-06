@@ -54,6 +54,8 @@ public class HealthComponent : MonoBehaviour {
 		//Destroy or pool game object
 		Debug.Log("Dead");
 
+		//Add screen shake
+
 		Destroy (this.gameObject);
 	}
 

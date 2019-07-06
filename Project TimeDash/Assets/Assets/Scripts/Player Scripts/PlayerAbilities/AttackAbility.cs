@@ -6,12 +6,14 @@ public class AttackAbility : MonoBehaviour {
 	public AttackState attackState;
 
 	//Public settings (set in inspector)
+	[Header ("Normal Attack Settings")]
 	public float attackTime; //How long an attack should last
 	public float attackDistance; //How far an attack will make a player move (% of the original walking distance)
 	public float regularCooldownTime;
 	public float comboCooldownTime;
 	public int comboMax;
 	public int baseAttackForce; //knockback
+	public int damageAmount; 
 	 
 	//References and variables needed
 	private int comboCount;
@@ -91,7 +93,7 @@ public class AttackAbility : MonoBehaviour {
 
 			//Let the attack info container know what just happened
 			playerAttackInfo.UpdateAttackInfo (AttackID.NormalAttack, 
-				baseAttackForce, movementInfo.GetLastMove().normalized );
+				baseAttackForce, movementInfo.GetLastMove().normalized, damageAmount );
 			break;
 
 

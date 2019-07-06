@@ -14,10 +14,12 @@ public class AbilitySprintAttack : MonoBehaviour {
 	private AttackState attackState; //Make private when done debugging
 
 	//Public settings
+	[Header ("Sprint Attack Settings")]
 	public float sprintAttackTime;
 	public float sprintAttackDistance;
 	public float sprintAttackCooldownTime;
 	public float baseAttackForce;
+	public int damageAmount;
 
 	//References and variables needed
 	private float currentLerpTime;
@@ -143,7 +145,7 @@ public class AbilitySprintAttack : MonoBehaviour {
 			playerFaceDirection = orientationSystem.DetermineDirectionFromVector (movementInfo.GetLastMove());
 			ActivateCorrespondingCollider (playerFaceDirection );  
 			playerAttackInfo.UpdateAttackInfo (AttackID.SprintAttack, baseAttackForce,
-				movementInfo.GetLastMove().normalized);
+				movementInfo.GetLastMove().normalized, damageAmount);
 			playerAnimator.Play ("Sprint Attack");
 			break;
 

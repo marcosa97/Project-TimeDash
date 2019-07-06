@@ -125,6 +125,28 @@ public class DashEnemyController : EnemyParentBase {
 		}
 	}
 
+	//Function to handle when the enemy hits the player's shield
+	//Interrupts attack and switches to pursuit state
+	public void AttackBlocked() {
+		attackTimer = 0f; //reset
+		timer = 0f;
+		attackState = AttackState.Attacking;
+
+		//For now, go into hurt state
+		//TODO LATER: Create a new state
+		//            that handles being parried / stunned
+		//            for a short time
+		previousState = EnemyBaseState.Pursuit;
+		flinchTimer = flinchTime;
+		enemyState = EnemyBaseState.Hurt;
+
+		colliderScript.DisableAttackCollider ();
+		Physics2D.IgnoreCollision(bodyCollider, playerCollider, false);
+
+		//Add force in opposite direction
+		rb.AddForce( -rb.velocity );
+	}
+
 	protected override void FixedAttack() {
 		switch(attackState) {
 		case AttackState.Attacking:
