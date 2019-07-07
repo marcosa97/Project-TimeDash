@@ -3,157 +3,167 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackAbility : MonoBehaviour {
-	public AttackState attackState;
+    public AttackState attackState;
 
-	//Public settings (set in inspector)
-	[Header ("Normal Attack Settings")]
-	public float attackTime; //How long an attack should last
-	public float attackDistance; //How far an attack will make a player move (% of the original walking distance)
-	public float regularCooldownTime;
-	public float comboCooldownTime;
-	public int comboMax;
-	public int baseAttackForce; //knockback
-	public int damageAmount; 
-	 
-	//References and variables needed
-	private int comboCount;
-	private float currentLerpTime;
-	private Vector2 startPosition; //For sprint attack
-	private Vector2 lastAttackDirection; 
-	private float timer;
-	private Rigidbody2D playerBody; //We need reference so we can move the body
-	private Animator playerAnimator;
-	private EightDirections playerFaceDirection;
-	private OrientationSystem orientationSystem;
-	private AbilityBasicMovement movementInfo;
-	private bool playerAttacking;
-	private AttackInfoContainer playerAttackInfo;
+    //Public settings (set in inspector)
+    [Header("Normal Attack Settings")]
+    public float inputBufferTime;
+    public float attackDistance; //How far an attack will make a player move (% of the original walking distance)
+    public float regularCooldownTime;
+    public float comboCooldownTime;
+    public int comboMax;
+    public int baseAttackForce; //knockback
+    public int damageAmount;
 
-	private SwordCollider swordCollider;
-	private SwordCollider swordColliderUp;
-	private SwordCollider swordColliderLeft;
-	private SwordCollider swordColliderRight;
-	//NOTE: Will need to add additional collider references for sprint attacks
-	// and for the chain attacks if they end up being different
+    //References and variables needed
+    private int comboCount;
+    private float currentLerpTime;
+    private Vector2 startPosition; //For sprint attack
+    private Vector2 lastAttackDirection;
+    private float timer;
+    private Rigidbody2D playerBody; //We need reference so we can move the body
+    private Animator playerAnimator;
+    private EightDirections playerFaceDirection;
+    private OrientationSystem orientationSystem;
+    private AbilityBasicMovement movementInfo;
+    private bool playerAttacking;
+    private AttackInfoContainer playerAttackInfo;
+    private bool bufferInput;
 
-	void Start() {
-		playerAttackInfo = GetComponent<AttackInfoContainer> ();
-		swordCollider = GameObject.Find ("Sword Collider Down").GetComponent<SwordCollider> (); //Down
-		swordColliderUp = GameObject.Find ("Sword Collider Up").GetComponent<SwordCollider> ();
-		if (swordColliderUp == null)
-			Debug.Log ("NULL UP ");
-		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
-		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
+    private SwordCollider swordCollider;
+    private SwordCollider swordColliderUp;
+    private SwordCollider swordColliderLeft;
+    private SwordCollider swordColliderRight;
+    //NOTE: Will need to add additional collider references for sprint attacks
+    // and for the chain attacks if they end up being different
 
-		playerBody = GetComponent<Rigidbody2D> ();
-		orientationSystem = GetComponent<OrientationSystem> ();
-		playerAnimator = GetComponent<Animator> ();
-		movementInfo = GetComponent<AbilityBasicMovement> ();
-		comboCount = 0;
-	}
+    void Start() {
+        playerAttackInfo = GetComponent<AttackInfoContainer>();
+        swordCollider = GameObject.Find("Sword Collider Down").GetComponent<SwordCollider>(); //Down
+        swordColliderUp = GameObject.Find("Sword Collider Up").GetComponent<SwordCollider>();
+        if (swordColliderUp == null)
+            Debug.Log("NULL UP ");
+        swordColliderLeft = GameObject.Find("Sword Collider Left").GetComponent<SwordCollider>();
+        swordColliderRight = GameObject.Find("Sword Collider Right").GetComponent<SwordCollider>();
 
-	//Performs the attack ability
-	//  @playerState: the state of the player is needed so we can change it to Attacking state
-	//  @playerAttacking: the bool is needed so that we can let the animator know when an attack is happening
-	//  @attackDirection: the vector that contains which direction the attack is happening at so we can set the 
-	//                    appropriate animation and collider
-	public void Attack(ref PlayerState playerState, Vector3 attackDirection) { 
-		switch (attackState) {
-		case AttackState.Ready:
-			//Setup attack
-			attackState = AttackState.Attacking;
-			timer = attackTime;
-			//Increase combo counter
-			comboCount++; //Use combo count to let animator know which attack is being performed
-			playerAnimator.SetInteger ("ComboCount", comboCount);
+        playerBody = GetComponent<Rigidbody2D>();
+        orientationSystem = GetComponent<OrientationSystem>();
+        playerAnimator = GetComponent<Animator>();
+        movementInfo = GetComponent<AbilityBasicMovement>();
+        comboCount = 0;
+        bufferInput = false;
+    }
 
-			if (comboCount == 1)
-				lastAttackDirection = attackDirection; 
+    //Performs the attack ability
+    //  @playerState: the state of the player is needed so we can change it to Attacking state
+    //  @playerAttacking: the bool is needed so that we can let the animator know when an attack is happening
+    //  @attackDirection: the vector that contains which direction the attack is happening at so we can set the 
+    //                    appropriate animation and collider
+    public void Attack(ref PlayerState playerState, Vector3 attackDirection) {
+        switch (attackState) {
+            case AttackState.Ready:
+                //Setup attack
+                attackState = AttackState.Attacking;
+                timer = inputBufferTime;
+                //Increase combo counter
+                comboCount++; //Use combo count to let animator know which attack is being performed
+                playerAnimator.SetInteger("ComboCount", comboCount);
 
-			//Decide which animation to play
-			switch (comboCount) {
-			case 1:
-				playerAnimator.Play ("Attack 1");
-				break;
-			case 2:
-				playerAnimator.Play ("Attack 2");
-				break;
-			case 3:
-				playerAnimator.Play ("Attack 3");
-				break;
-			case 4:
-				playerAnimator.Play ("Attack 4");
-				break;
-			}
+                if (comboCount == 1)
+                    lastAttackDirection = attackDirection;
 
-			//Determine which animation to play and which collider to enable
-			playerFaceDirection = orientationSystem.GetDirection (CreateAttackVector ());
-			ActivateCorrespondingCollider (playerFaceDirection);
-			playerAttacking = true;
+                //Decide which animation to play
+                switch (comboCount) {
+                    case 1:
+                        playerAnimator.Play("Attack 1");
+                        break;
+                    case 2:
+                        playerAnimator.Play("Attack 2");
+                        break;
+                    case 3:
+                        playerAnimator.Play("Attack 1");
+                        break;
+                    case 4:
+                        playerAnimator.Play("Attack 2");
+                        break;
+                }
 
-			//Let the attack info container know what just happened
-			playerAttackInfo.UpdateAttackInfo (AttackID.NormalAttack, 
-				baseAttackForce, movementInfo.GetLastMove().normalized, damageAmount );
-			break;
+                //Determine which animation to play and which collider to enable
+                playerFaceDirection = orientationSystem.GetDirection(CreateAttackVector());
+                ActivateCorrespondingCollider(playerFaceDirection);
+                playerAttacking = true;
 
-
-		case AttackState.Attacking:
-			//This state is when the sword is swinging in the animation
-			timer -= Time.deltaTime;
-
-			//move towards click position
-			playerBody.velocity = Vector2.zero; //Stop player from moving while attacking
-			transform.position = Vector3.MoveTowards (transform.position, lastAttackDirection, attackDistance * Time.deltaTime);
-
-			//Set attacking animation
-			//playerAttacking = true;
-
-			if (timer <= 0f) {
-				attackState = AttackState.Done;
-				//playerAttacking = false;
-
-				//Deactivate sword collider
-				DeactivateCorrespondingCollider(playerFaceDirection);
-
-				//Window of time that player can chain another attack for a combo
-				if (comboCount != comboMax) {
-					timer = regularCooldownTime;
-				} else {
-					timer = comboCooldownTime;
-				}
-			}
-			break;
+                //Let the attack info container know what just happened
+                playerAttackInfo.UpdateAttackInfo(AttackID.NormalAttack,
+                    baseAttackForce, movementInfo.GetLastMove().normalized, damageAmount);
+                break;
 
 
-		case AttackState.Done:
-			//NOTE: Will need to have the animation continue to play during this state. During this state, the sword is 
-			//      no longer swinging, but this state can be interrupted by another attack -> combo
-			timer -= Time.deltaTime;
+            case AttackState.Attacking:
+                //This state is when the sword is swinging in the animation
+                timer -= Time.deltaTime;
 
-			//Inputs that can interrupt attack:
-			//  Moving
-			//  Attack -> Combo
-			//If input is received within cooldown period (except when combo max reached), change states. 
-			if (Input.GetButtonDown ("AttackPS4") && (comboCount != comboMax) ) {
-				//Go to next attack -> Maybe create switch case here to assign different animations or attack times
-				attackState = AttackState.Ready;
-			}
+                //Check if user inputted attack while an attack is still happening (in buffer time window)
+                if ( !(timer <= 0f) && Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) {
+                    bufferInput = true;
+                }
 
-			//If input not received, finish playing the cooldown animation and then transition into default state
-			if (timer <= 0f) {
-				//Reset stuff
-				comboCount = 0;
-				timer = 0f;
-				playerAttacking = false;
-				attackState = AttackState.Ready;
-				playerState = PlayerState.Default;
-			}
+                //move towards click position
+                playerBody.velocity = Vector2.zero; //Stop player from moving while attacking
+                transform.position = Vector3.MoveTowards(transform.position, lastAttackDirection, attackDistance * Time.deltaTime);
 
-			//need some sort of bool/message that will let the animator know to keep playing cooldown animation/sprite
+                //Animation Event will trigger exit out of this state
+                break;
+         
 
-			break;
-		}//switch
-	}
+            case AttackState.Done:
+                //NOTE: Will need to have the animation continue to play during this state. During this state, the sword is 
+                //      no longer swinging, but this state can be interrupted by another attack -> combo
+                timer -= Time.deltaTime;
+
+                //Inputs that can interrupt attack:
+                //  Moving
+                //  Attack -> Combo
+                //If input is received within cooldown period (except when combo max reached), change states. 
+                if ( (Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) || bufferInput) {
+                    //Go to next attack -> Maybe create switch case here to assign different animations or attack times
+                    attackState = AttackState.Ready;
+                    bufferInput = false;
+                }
+
+                //If input not received, finish playing the cooldown animation and then transition into default state
+                if (timer <= 0f) {
+                    //Reset stuff
+                    comboCount = 0;
+                    timer = 0f;
+                    playerAttacking = false;
+                    attackState = AttackState.Ready;
+                    playerState = PlayerState.Default;
+                }
+
+                //need some sort of bool/message that will let the animator know to keep playing cooldown animation/sprite
+
+                break;
+        }//switch
+    }
+
+    public void StopAttack() {
+        this.attackState = AttackState.Done;
+
+        //Deactivate sword collider
+        DeactivateCorrespondingCollider(playerFaceDirection);
+
+        //Window of time that player can chain another attack for a combo
+        if (this.comboCount != comboMax)
+        {
+            this.timer = regularCooldownTime;
+        }
+        else
+        {
+            this.timer = comboCooldownTime;
+        }
+
+    }
 
 	//Create an attack vector from given components -> "attack vector" has a specific magnitude
 	private Vector2 CreateAttackVector() {
@@ -274,6 +284,7 @@ public class AttackAbility : MonoBehaviour {
 		comboCount = 0;
 		playerAttacking = false;
 		playerBody.velocity = Vector2.zero;
+        bufferInput = false;
 
 		//Deactivate sword collider
 		DeactivateCorrespondingCollider (playerFaceDirection);
