@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackAbility : MonoBehaviour {
+    [SerializeField]
     public AttackState attackState;
 
     //Public settings (set in inspector)
@@ -29,6 +30,7 @@ public class AttackAbility : MonoBehaviour {
     private bool playerAttacking;
     private AttackInfoContainer playerAttackInfo;
     private bool bufferInput;
+    private bool chargeAttack;
 
     private SwordCollider swordCollider;
     private SwordCollider swordColliderUp;
@@ -52,6 +54,7 @@ public class AttackAbility : MonoBehaviour {
         movementInfo = GetComponent<AbilityBasicMovement>();
         comboCount = 0;
         bufferInput = false;
+        chargeAttack = false;
     }
 
     //Performs the attack ability
@@ -88,20 +91,35 @@ public class AttackAbility : MonoBehaviour {
                         break;
                 }
 
-                //Determine which animation to play and which collider to enable
+                //Determine which which collider to enable
                 playerFaceDirection = orientationSystem.GetDirection(CreateAttackVector());
                 ActivateCorrespondingCollider(playerFaceDirection);
                 playerAttacking = true;
 
+                //Set up to check if charged attack will be performed
+                //Charge attack happens if attack button is held down while performing attack
+                if (Input.GetButtonUp("AttackPS4")) {
+                    this.chargeAttack = false;
+                    Debug.Log("No Charged Attack");
+                } else {
+                    this.chargeAttack = true;
+                    Debug.Log("Charged Attack");
+                }
+
                 //Let the attack info container know what just happened
                 playerAttackInfo.UpdateAttackInfo(AttackID.NormalAttack,
                     baseAttackForce, movementInfo.GetLastMove().normalized, damageAmount);
+                Debug.Log("Done Setting up Player Attack");
                 break;
 
 
             case AttackState.Attacking:
                 //This state is when the sword is swinging in the animation
                 timer -= Time.deltaTime;
+
+                if ( Input.GetButtonUp("AttackPS4") ) {
+                    this.chargeAttack = false;
+                }
 
                 //Check if user inputted attack while an attack is still happening (in buffer time window)
                 if ( !(timer <= 0f) && Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) {
@@ -121,12 +139,18 @@ public class AttackAbility : MonoBehaviour {
                 //      no longer swinging, but this state can be interrupted by another attack -> combo
                 timer -= Time.deltaTime;
 
+                //Check for charged attack
+                if ( Input.GetButtonUp("AttackPS4") || comboCount == comboMax) {
+                    this.chargeAttack = false;
+                }
+
                 //Inputs that can interrupt attack:
                 //  Moving
                 //  Attack -> Combo
                 //If input is received within cooldown period (except when combo max reached), change states. 
                 if ( (Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) || bufferInput) {
                     //Go to next attack -> Maybe create switch case here to assign different animations or attack times
+                    Debug.Log("Buffered Input");
                     attackState = AttackState.Ready;
                     bufferInput = false;
                 }
@@ -138,7 +162,18 @@ public class AttackAbility : MonoBehaviour {
                     timer = 0f;
                     playerAttacking = false;
                     attackState = AttackState.Ready;
-                    playerState = PlayerState.Default;
+
+                    if (this.chargeAttack) {
+                        Debug.Log("going into charge attack");
+                        playerState = PlayerState.ChargedAttacking;
+                    } else {
+                        playerState = PlayerState.Default;
+                    }
+
+                    this.bufferInput = false;
+                    this.chargeAttack = true;
+
+                    Debug.Log("attack cooldown timer ran out");
                 }
 
                 //need some sort of bool/message that will let the animator know to keep playing cooldown animation/sprite
@@ -285,6 +320,7 @@ public class AttackAbility : MonoBehaviour {
 		playerAttacking = false;
 		playerBody.velocity = Vector2.zero;
         bufferInput = false;
+        this.chargeAttack = true;
 
 		//Deactivate sword collider
 		DeactivateCorrespondingCollider (playerFaceDirection);

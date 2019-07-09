@@ -14,7 +14,6 @@ public class AbilityChargedAttack : MonoBehaviour {
 	//public settings
 	[Header ("Charged Attack Settings")]
 	public float maxChargeTime;
-	public float attackTime;
 	public float cooldownTime;
 	public float baseAttackForce;
 	public int chargeMultiplier;
@@ -24,14 +23,12 @@ public class AbilityChargedAttack : MonoBehaviour {
 	private float timer;
 	private float finalAttackForce; //after modifications applied
 	private ChargeAttackState chargeAttackState;
-	private PlayerOrientation playerOrientation;
-	private PlayerDirections playerDirection; //enum
 	private AbilityBasicMovement movementInfo;
 	private Rigidbody2D playerBody;
 	private SpriteRenderer spriteRenderer; //needed to make sprite flash
 	private Animator animator;
-	private OrientationSystem orientationSystem;
-	private EightDirections playerFaceDirection; //enum
+    private FourDirectionSystem DirectionHandler;
+    private FourDirections playerFaceDirection;
 	private Vector2 lastAttackDirection; 
 	private bool playerChargeAttacking;
 
@@ -46,12 +43,13 @@ public class AbilityChargedAttack : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		playerAttackInfo = GetComponent<AttackInfoContainer> ();
-		playerOrientation = GetComponent<PlayerOrientation> ();
+		//playerOrientation = GetComponent<PlayerOrientation> ();
 		movementInfo = GetComponent<AbilityBasicMovement> ();
 		playerBody = GetComponent<Rigidbody2D> ();
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 		animator = GetComponent<Animator> ();
-		orientationSystem = GetComponent<OrientationSystem> ();
+        //orientationSystem = GetComponent<OrientationSystem> ();
+        DirectionHandler = new FourDirectionSystem();
 		chargeAttackState = ChargeAttackState.Setup;
 
 		colliderUp = GameObject.Find ("cAttack Collider Up").GetComponent<SwordCollider> ();
@@ -65,78 +63,46 @@ public class AbilityChargedAttack : MonoBehaviour {
 		colliderLeft.DisableCollider ();
 	}
 
-	private void ActivateCorrespondingCollider(EightDirections dir) {
+	private void ActivateCorrespondingCollider(FourDirections dir) {
 		switch (dir) {
-		case EightDirections.North:
+		case FourDirections.North:
 			//Debug.Log ("North");
 			//Activate RightUp collider and animation
 			colliderUp.EnableCollider();
 			break;
-		case EightDirections.NorthEast:
-			//Debug.Log ("North East");
-			//swordColliderUp.Enable ();
-			break;
-		case EightDirections.East:
+		case FourDirections.East:
 			//Debug.Log ("East");
 			colliderRight.EnableCollider ();
 			break;
-		case EightDirections.SouthEast:
-			//Debug.Log ("South East");
-			//swordColliderLeft.Enable ();
-			break;
-		case EightDirections.South:
+		case FourDirections.South:
 			//Debug.Log ("South");
 			colliderDown.EnableCollider ();
 			break;
-		case EightDirections.SouthWest:
-			//Debug.Log ("South West");
-			//swordCollider.Enable ();
-			break;
-		case EightDirections.West:
+		case FourDirections.West:
 			//Debug.Log ("West");
 			colliderLeft.EnableCollider ();
-			break;
-		case EightDirections.NorthWest:
-			//Debug.Log ("North West");
-			//swordColliderRight.Enable ();
 			break;
 		}
 	}
 
-	private void DeactivateCorrespondingCollider(EightDirections dir) {
+	private void DeactivateCorrespondingCollider(FourDirections dir) {
 		switch (dir) {
-		case EightDirections.North:
+		case FourDirections.North:
 			//Debug.Log ("North");
 			//Activate RightUp collider and animation
 			colliderUp.DisableCollider();
 			break;
-		case EightDirections.NorthEast:
-			//Debug.Log ("North East");
-			//swordColliderUp.Enable ();
-			break;
-		case EightDirections.East:
+		case FourDirections.East:
 			//Debug.Log ("East");
 			colliderRight.DisableCollider ();
 			break;
-		case EightDirections.SouthEast:
-			//Debug.Log ("South East");
-			//swordColliderLeft.Enable ();
-			break;
-		case EightDirections.South:
+		case FourDirections.South:
 			//Debug.Log ("South");
 			colliderDown.DisableCollider ();
 			break;
-		case EightDirections.SouthWest:
-			//Debug.Log ("South West");
-			//swordCollider.Enable ();
-			break;
-		case EightDirections.West:
+		case FourDirections.West:
 			//Debug.Log ("West");
 			colliderLeft.DisableCollider ();
-			break;
-		case EightDirections.NorthWest:
-			//Debug.Log ("North West");
-			//swordColliderRight.Enable ();
 			break;
 		}
 	}
@@ -170,21 +136,22 @@ public class AbilityChargedAttack : MonoBehaviour {
 			playerBody.velocity = Vector2.zero; 
 			spriteRenderer.material.SetFloat ("_FlashAmount", 0.60f);
 
-			//Activate corresponding collider
-			playerFaceDirection = orientationSystem.GetDirection (CreateAttackVector ());
+                //Activate corresponding collider
+                //playerFaceDirection = orientationSystem.GetDirection(attackDirection);
+                playerFaceDirection = DirectionHandler.GetDirectionFromVector(attackDirection);
 			break;
 
 		case ChargeAttackState.Charging:
 			timer -= Time.deltaTime;
 
-			//Play Charging Animation
+            //Play Charging Animation
+            animator.Play("Charging Attack");
 
 			//Make player flash while charging
 			spriteRenderer.material.SetFloat("_FlashAmount", Mathf.PingPong(timer * 4.7f, 0.60f) );
 
 			//If timer is up or player releases button, then perform attack
 			if (timer <= 0f || (Input.GetButtonUp ("AttackPS4")) ) {
-				timer = attackTime;
 				spriteRenderer.material.SetFloat ("_FlashAmount", 0f);
 				chargeAttackState = ChargeAttackState.Attacking;
 				ActivateCorrespondingCollider (playerFaceDirection); 
@@ -200,25 +167,13 @@ public class AbilityChargedAttack : MonoBehaviour {
 				break;
 			}
 
-			//If interrupted (enemy hits player), reset stuff
-			//If animation doesn't work, play it here
 			break;
 
 		case ChargeAttackState.Attacking:
-			timer -= Time.deltaTime;
 
-			//Play animation
-			animator.Play("Charged Attack");
-
-			//Activate colliders
-
-			if (timer <= 0f) {
-				//Deactivate collider 
-				DeactivateCorrespondingCollider (playerFaceDirection);
-
-				timer = cooldownTime;
-				chargeAttackState = ChargeAttackState.Cooldown;
-			}
+            //Play animation
+            animator.Play("Charged Attack");
+            
 			break;
 
 		case ChargeAttackState.Cooldown:
@@ -234,6 +189,14 @@ public class AbilityChargedAttack : MonoBehaviour {
 			break;
 		}
 	}
+
+    private void StopChargedAttack() {
+        //Deactivate sword collider
+        DeactivateCorrespondingCollider(playerFaceDirection);
+
+        this.timer = cooldownTime;
+        this.chargeAttackState = ChargeAttackState.Cooldown;
+    }
 
 	public void ResetState(ref PlayerState playerState) {
 		playerState = PlayerState.Default;

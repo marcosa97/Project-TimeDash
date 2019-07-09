@@ -6,13 +6,6 @@ using UnityEngine;
 //This class handles the player's basic movement states
 public class AbilityBasicMovement : MonoBehaviour {
 
-	//There will be a time window when the player begins to move in which "Attack" button can be 
-	//    pressed to initiate a charged attack
-	private enum MoveState {
-		ChargeAttackTimeWindow,
-		Moving
-	}
-
 	//Public settings
 	public float walkSpeed;   //Set in inspector
 	public float sprintSpeed; //Set in inspector
@@ -22,7 +15,6 @@ public class AbilityBasicMovement : MonoBehaviour {
 	//References and variables neded
 	private float timer;
 	private float moveSpeed;
-	private MoveState moveState;
 	private Rigidbody2D playerBody;
 
 	private Vector2 lastMove;
@@ -45,7 +37,6 @@ public class AbilityBasicMovement : MonoBehaviour {
 		MovePlayer();
 		if (playerMoving) {
 			playerState = PlayerState.Moving; //change to chargeAttackTime when implemented
-			moveState = MoveState.ChargeAttackTimeWindow;
 			timer = chargeAttackTimeWindow;
 		}
 
@@ -55,8 +46,8 @@ public class AbilityBasicMovement : MonoBehaviour {
 	}
 
 	public void Move(ref PlayerState playerState) {
-
-		switch (moveState) {
+        
+        /*
 		case MoveState.ChargeAttackTimeWindow:
 			timer -= Time.deltaTime;
 
@@ -77,17 +68,14 @@ public class AbilityBasicMovement : MonoBehaviour {
 			}
 
 			break;
+        */
 
-		case MoveState.Moving:
-			//Get Input
-			MovePlayer ();
-			if (!playerMoving)
-				playerState = PlayerState.Default;
+		//Get Input
+		MovePlayer ();
+		if (!playerMoving)
+			playerState = PlayerState.Default;
 
-			GetControllerInput (ref playerState);
-
-			break;
-		}
+		GetControllerInput (ref playerState);
 
 	}
 
@@ -280,7 +268,6 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 	//Resets the state variables to how they are before the player enters this state
 	public void ResetState(ref PlayerState playerState) {
-		moveState = MoveState.ChargeAttackTimeWindow;
 		playerState = PlayerState.Default;
 		timer = 0f;
 		playerBody.velocity = Vector2.zero;
