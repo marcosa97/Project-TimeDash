@@ -26,8 +26,8 @@ public class AbilitySprintAttack : MonoBehaviour {
 	private Vector2 startPosition; //For sprint attack lerp
 	private float attackTimer;
 	private Rigidbody2D playerBody; //We need reference so we can move the body
-	private OrientationSystem orientationSystem;
-	private EightDirections playerFaceDirection;
+    private FourDirectionSystem DirectionHandler;
+    private FourDirections playerFaceDirection;
 	private Animator playerAnimator;
 	private AbilityBasicMovement movementInfo;
 	private AttackInfoContainer playerAttackInfo;
@@ -49,83 +49,49 @@ public class AbilitySprintAttack : MonoBehaviour {
 		swordColliderLeft = GameObject.Find ("Sword Collider Left").GetComponent<SwordCollider> ();
 		swordColliderRight = GameObject.Find ("Sword Collider Right").GetComponent<SwordCollider> ();
 		playerBody = GetComponent<Rigidbody2D> ();
-		orientationSystem = GetComponent<OrientationSystem> ();
+        DirectionHandler = new FourDirectionSystem();
 		playerAnimator = GetComponent<Animator> ();
 	}
 
 	//Activates the appropriate collider and animation ID/Integer
-	private void ActivateCorrespondingCollider(EightDirections dir) {
+	private void ActivateCorrespondingCollider(FourDirections dir) {
 		switch (dir) {
-		case EightDirections.North:
+		case FourDirections.North:
 			Debug.Log ("RIGHT UP");
-			//Activate RightUp collider and animation
 			swordColliderUp.EnableCollider();
 			break;
-		case EightDirections.NorthEast:
-			Debug.Log ("UP RIGHT");
-			//swordColliderUp.EnableCollider ();
-			break;
-		case EightDirections.East:
+		case FourDirections.East:
 			Debug.Log ("UP LEFT");
 			swordColliderRight.EnableCollider ();
 			break;
-		case EightDirections.SouthEast:
-			Debug.Log ("LEFT UP");
-			//swordColliderLeft.EnableCollider ();
-			break;
-		case EightDirections.South:
+		case FourDirections.South:
 			Debug.Log ("LEFT DOWN");
 			swordCollider.EnableCollider ();
 			break;
-		case EightDirections.SouthWest:
-			Debug.Log ("DOWN LEFT");
-			//swordCollider.EnableCollider ();
-			break;
-		case EightDirections.West:
+		case FourDirections.West:
 			Debug.Log ("DOWN RIGHT");
 			swordColliderLeft.EnableCollider ();
-			break;
-		case EightDirections.NorthWest:
-			Debug.Log ("RIGHT DOWN");
-			//swordColliderRight.EnableCollider ();
 			break;
 		}
 	}
 
-	private void DeactivateCorrespondingCollider (EightDirections dir) {
+	private void DeactivateCorrespondingCollider (FourDirections dir) {
 		switch (dir) {
-		case EightDirections.North:
+		case FourDirections.North:
 			Debug.Log ("RIGHT UP");
-			//Activate RightUp collider and animation
 			swordColliderUp.DisableCollider();
 			break;
-		case EightDirections.NorthEast:
-			Debug.Log ("UP RIGHT");
-			//swordColliderUp.EnableCollider ();
-			break;
-		case EightDirections.East:
+		case FourDirections.East:
 			Debug.Log ("UP LEFT");
 			swordColliderRight.DisableCollider ();
 			break;
-		case EightDirections.SouthEast:
-			Debug.Log ("LEFT UP");
-			//swordColliderLeft.EnableCollider ();
-			break;
-		case EightDirections.South:
+		case FourDirections.South:
 			Debug.Log ("LEFT DOWN");
 			swordCollider.DisableCollider ();
 			break;
-		case EightDirections.SouthWest:
-			Debug.Log ("DOWN LEFT");
-			//swordCollider.EnableCollider ();
-			break;
-		case EightDirections.West:
+		case FourDirections.West:
 			Debug.Log ("DOWN RIGHT");
 			swordColliderLeft.DisableCollider ();
-			break;
-		case EightDirections.NorthWest:
-			Debug.Log ("RIGHT DOWN");
-			//swordColliderRight.EnableCollider ();
 			break;
 		}
 	}
@@ -142,7 +108,7 @@ public class AbilitySprintAttack : MonoBehaviour {
 			currentLerpTime = 0f;
 			Debug.Log ("SPRINT ATTACK!"); 
 
-			playerFaceDirection = orientationSystem.DetermineDirectionFromVector (movementInfo.GetLastMove());
+            playerFaceDirection = DirectionHandler.GetDirectionFromVector(movementInfo.GetLastMove());
 			ActivateCorrespondingCollider (playerFaceDirection );  
 			playerAttackInfo.UpdateAttackInfo (AttackID.SprintAttack, baseAttackForce,
 				movementInfo.GetLastMove().normalized, damageAmount);
@@ -155,8 +121,6 @@ public class AbilitySprintAttack : MonoBehaviour {
 
 			//move towards attack direction
 			playerBody.velocity = Vector2.zero; //Stop player from moving while attacking
-			//transform.position = Vector3.MoveTowards (transform.position, attackDirection, sprintAttackDistance * Time.deltaTime);
-			//float t = 
 
 			currentLerpTime += Time.deltaTime;
 			if (currentLerpTime > sprintAttackTime)

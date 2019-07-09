@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
 using UnityEngine;
 
 public class AttackAbility : MonoBehaviour {
@@ -18,19 +17,18 @@ public class AttackAbility : MonoBehaviour {
 
     //References and variables needed
     private int comboCount;
-    private float currentLerpTime;
-    private Vector2 startPosition; //For sprint attack
     private Vector2 lastAttackDirection;
     private float timer;
     private Rigidbody2D playerBody; //We need reference so we can move the body
     private Animator playerAnimator;
-    private EightDirections playerFaceDirection;
-    private OrientationSystem orientationSystem;
+    private FourDirections playerFaceDirection;
+    private FourDirectionSystem DirectionHandler;
     private AbilityBasicMovement movementInfo;
     private bool playerAttacking;
     private AttackInfoContainer playerAttackInfo;
     private bool bufferInput;
     private bool chargeAttack;
+    private Vector2 targetPosition;
 
     private SwordCollider swordCollider;
     private SwordCollider swordColliderUp;
@@ -49,7 +47,8 @@ public class AttackAbility : MonoBehaviour {
         swordColliderRight = GameObject.Find("Sword Collider Right").GetComponent<SwordCollider>();
 
         playerBody = GetComponent<Rigidbody2D>();
-        orientationSystem = GetComponent<OrientationSystem>();
+        //orientationSystem = GetComponent<OrientationSystem>();
+        DirectionHandler = new FourDirectionSystem();
         playerAnimator = GetComponent<Animator>();
         movementInfo = GetComponent<AbilityBasicMovement>();
         comboCount = 0;
@@ -72,8 +71,9 @@ public class AttackAbility : MonoBehaviour {
                 comboCount++; //Use combo count to let animator know which attack is being performed
                 playerAnimator.SetInteger("ComboCount", comboCount);
 
-                if (comboCount == 1)
+                if (comboCount == 1) {
                     lastAttackDirection = attackDirection;
+                }
 
                 //Decide which animation to play
                 switch (comboCount) {
@@ -92,7 +92,9 @@ public class AttackAbility : MonoBehaviour {
                 }
 
                 //Determine which which collider to enable
-                playerFaceDirection = orientationSystem.GetDirection(CreateAttackVector());
+                //playerFaceDirection = orientationSystem.GetDirection(CreateAttackVector());
+                Debug.Log(CreateAttackVector());
+                playerFaceDirection = DirectionHandler.GetDirectionFromVector(CreateAttackVector());
                 ActivateCorrespondingCollider(playerFaceDirection);
                 playerAttacking = true;
 
@@ -100,16 +102,18 @@ public class AttackAbility : MonoBehaviour {
                 //Charge attack happens if attack button is held down while performing attack
                 if (Input.GetButtonUp("AttackPS4")) {
                     this.chargeAttack = false;
-                    Debug.Log("No Charged Attack");
                 } else {
                     this.chargeAttack = true;
-                    Debug.Log("Charged Attack");
                 }
 
                 //Let the attack info container know what just happened
                 playerAttackInfo.UpdateAttackInfo(AttackID.NormalAttack,
                     baseAttackForce, movementInfo.GetLastMove().normalized, damageAmount);
-                Debug.Log("Done Setting up Player Attack");
+
+                //Calculate where the attack will move the player
+                targetPosition = new Vector3(transform.position.x + lastAttackDirection.x * 10f,
+					transform.position.y + lastAttackDirection.y * 10f);
+
                 break;
 
 
@@ -128,7 +132,7 @@ public class AttackAbility : MonoBehaviour {
 
                 //move towards click position
                 playerBody.velocity = Vector2.zero; //Stop player from moving while attacking
-                transform.position = Vector3.MoveTowards(transform.position, lastAttackDirection, attackDistance * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, targetPosition, attackDistance * Time.deltaTime);
 
                 //Animation Event will trigger exit out of this state
                 break;
@@ -164,7 +168,6 @@ public class AttackAbility : MonoBehaviour {
                     attackState = AttackState.Ready;
 
                     if (this.chargeAttack) {
-                        Debug.Log("going into charge attack");
                         playerState = PlayerState.ChargedAttacking;
                     } else {
                         playerState = PlayerState.Default;
@@ -172,8 +175,6 @@ public class AttackAbility : MonoBehaviour {
 
                     this.bufferInput = false;
                     this.chargeAttack = true;
-
-                    Debug.Log("attack cooldown timer ran out");
                 }
 
                 //need some sort of bool/message that will let the animator know to keep playing cooldown animation/sprite
@@ -210,7 +211,7 @@ public class AttackAbility : MonoBehaviour {
 		if ((x != 0f) || (y != 0f)) { 
 			movementInfo.UpdateLastMove (v); //For animator to work correctly
 			v.Normalize ();
-			v = new Vector2 (transform.position.x + v.x, transform.position.y + v.y);
+			//v = new Vector2 (transform.position.x + v.x, transform.position.y + v.y);
 		} else {
 			v = lastAttackDirection;
 		}
@@ -221,76 +222,44 @@ public class AttackAbility : MonoBehaviour {
 	}
 
 	//Determines what direction to face when attacking and enables the corresponding collider
-	private void ActivateCorrespondingCollider(EightDirections direction) {
+	private void ActivateCorrespondingCollider(FourDirections direction) {
 		switch (direction) {
-		case EightDirections.North:
-			//Debug.Log ("North");
+		case FourDirections.North:
+			Debug.Log ("North");
 			swordColliderUp.EnableCollider ();
 			break;
-		case EightDirections.NorthEast:
-			//Debug.Log ("North East");
-			//swordColliderUp.Enable ();
-			break;
-		case EightDirections.East:
-			//Debug.Log ("East");
+		case FourDirections.East:
+			Debug.Log ("East");
 			swordColliderRight.EnableCollider();
 			break;
-		case EightDirections.SouthEast:
-			//Debug.Log ("South East");
-			//swordColliderLeft.Enable ();
-			break;
-		case EightDirections.South:
-			//Debug.Log ("South");
+		case FourDirections.South:
+			Debug.Log ("South");
 			swordCollider.EnableCollider();
 			break;
-		case EightDirections.SouthWest:
-			//Debug.Log ("South West");
-			//swordCollider.Enable ();
-			break;
-		case EightDirections.West:
-			//Debug.Log ("West");
+		case FourDirections.West:
+			Debug.Log ("West");
 			swordColliderLeft.EnableCollider();
-			break;
-		case EightDirections.NorthWest:
-			//Debug.Log ("North West");
-			//swordColliderRight.Enable ();
 			break;
 		}
 	}
 
-	private void DeactivateCorrespondingCollider(EightDirections direction) {
+	private void DeactivateCorrespondingCollider(FourDirections direction) {
 		switch (direction) {
-		case EightDirections.North:
+		case FourDirections.North:
 			//Debug.Log ("North");
 			swordColliderUp.DisableCollider ();
 			break;
-		case EightDirections.NorthEast:
-			//Debug.Log ("North East");
-			//swordColliderUp.Enable ();
-			break;
-		case EightDirections.East:
+		case FourDirections.East:
 			//Debug.Log ("East");
 			swordColliderRight.DisableCollider();
 			break;
-		case EightDirections.SouthEast:
-			//Debug.Log ("South East");
-			//swordColliderLeft.Enable ();
-			break;
-		case EightDirections.South:
+		case FourDirections.South:
 			//Debug.Log ("South");
 			swordCollider.DisableCollider();
 			break;
-		case EightDirections.SouthWest:
-			//Debug.Log ("South West");
-			//swordCollider.Enable ();
-			break;
-		case EightDirections.West:
+		case FourDirections.West:
 			//Debug.Log ("West");
 			swordColliderLeft.DisableCollider();
-			break;
-		case EightDirections.NorthWest:
-			//Debug.Log ("North West");
-			//swordColliderRight.Enable ();
 			break;
 		}
 	}

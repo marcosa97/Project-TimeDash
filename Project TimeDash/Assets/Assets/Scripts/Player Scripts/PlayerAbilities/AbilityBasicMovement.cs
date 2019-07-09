@@ -167,10 +167,12 @@ public class AbilityBasicMovement : MonoBehaviour {
 			//Attack in direction player is facing
 			//NOTE: Multiplied by 10 so that the player moves far enough when attacking
 			lastMove.Normalize ();
-			//Change attack distance depending on which move is executed
+            //Change attack distance depending on which move is executed
+            attackDirection = new Vector2(lastMove.x, lastMove.y);
+
 			if (!playerSprinting) {
-				attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
-					transform.position.y + lastMove.y * 10f);
+				//attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
+				//	transform.position.y + lastMove.y * 10f);
 
 				playerState = PlayerState.Attacking;
 			} else {
