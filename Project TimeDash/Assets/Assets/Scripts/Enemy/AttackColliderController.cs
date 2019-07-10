@@ -25,6 +25,7 @@ public class AttackColliderController : MonoBehaviour {
             attackInfo = GetComponentInParent<AttackInfoContainer>();
 
             Debug.Log("Hit player");
+            Debug.Log(attackInfo.damage);
             playerController.HurtPlayer(attackInfo);
             hitPlayer = true;
             return;

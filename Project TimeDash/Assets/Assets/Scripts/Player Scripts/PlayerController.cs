@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour {
 	private AbilityGrab grabAbility;
 	private PlayerStateFlinch flinchState;
 	private HurtInfoReceiver hurtInfo;
+    private PlayerHealthComponent playerHealthComponent;
 	//public AbilityHyperDash abilityHyperDash;
 
 
@@ -49,6 +50,7 @@ public class PlayerController : MonoBehaviour {
 		grabAbility = GetComponent<AbilityGrab> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
+        playerHealthComponent = GetComponent<PlayerHealthComponent>();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
 
 		//If Player doesn't exist yet
@@ -217,6 +219,9 @@ public class PlayerController : MonoBehaviour {
 	public void HurtPlayer(AttackInfoContainer enemyAttack) {
 		//Update info on hurt script
 		hurtInfo.UpdateHurtInfo(enemyAttack);
+
+        //Deal Damage
+        playerHealthComponent.TakeDamage(enemyAttack.damage);
 
 		CancelCurrentState ();
 
