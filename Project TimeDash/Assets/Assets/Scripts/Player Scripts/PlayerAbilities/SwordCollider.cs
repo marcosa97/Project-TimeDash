@@ -17,6 +17,8 @@ public class SwordCollider : MonoBehaviour {
 	private TimeFunctions timeManager;
 	private GameObject hitParticles;
 	private AttackInfoContainer playerAttackInfo;
+    private PlayerSPComponent SPManager;
+    private PlayerSPValues SPValues;
 
 	// Use this for initialization
 	void Start () {
@@ -28,6 +30,8 @@ public class SwordCollider : MonoBehaviour {
 		targetsHit = new List<int> ();
 		moveInfo = GetComponentInParent<AbilityBasicMovement> ();
 		playerAttackInfo = GetComponentInParent<AttackInfoContainer> ();
+        SPManager = GetComponentInParent<PlayerSPComponent>();
+        SPValues = new PlayerSPValues();
 		timeManager = GameObject.Find("Time Manager").GetComponent<TimeFunctions> ();
 		hitParticles = GameObject.Find ("HitParticles");
 		DisableCollider ();
@@ -47,6 +51,9 @@ public class SwordCollider : MonoBehaviour {
 				//Get attack info from the attack info object attached to the player,
 				//  and send it to the other object to process	
 				other.SendMessage("ObjectHit", playerAttackInfo );
+
+                //Increase SP
+                SPManager.IncrementSP(SPValues.NormalAttackSPGain);
 
 				//Call Time.Timescale using SendMessage or a reference to time manager
 				timeManager.StartCoroutine("HitStop");
