@@ -63,7 +63,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 		colliderLeft.DisableCollider ();
 	}
 
-	private void ActivateCorrespondingCollider(FourDirections dir) {
+	public void ActivateCorrespondingCollider(FourDirections dir) {
 		switch (dir) {
 		case FourDirections.North:
 			//Debug.Log ("North");
@@ -85,7 +85,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 		}
 	}
 
-	private void DeactivateCorrespondingCollider(FourDirections dir) {
+	public void DeactivateCorrespondingCollider(FourDirections dir) {
 		switch (dir) {
 		case FourDirections.North:
 			//Debug.Log ("North");

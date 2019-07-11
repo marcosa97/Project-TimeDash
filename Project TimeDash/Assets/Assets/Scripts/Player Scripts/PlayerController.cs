@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour {
 	private AbilityDodgeRoll dodgeAbility;
 	private AbilitySprintAttack sprintAttackAbility;
 	private AbilityChargedAttack chargedAttackAbility;
+    private AbilityWarpStrike warpStrikeAbility;
 	private AbilityGrab grabAbility;
 	private PlayerStateFlinch flinchState;
 	private HurtInfoReceiver hurtInfo;
@@ -47,6 +48,7 @@ public class PlayerController : MonoBehaviour {
 		dodgeAbility = GetComponent<AbilityDodgeRoll> ();
 		sprintAttackAbility = GetComponent<AbilitySprintAttack> ();
 		chargedAttackAbility = GetComponent<AbilityChargedAttack> ();
+        warpStrikeAbility = GetComponent<AbilityWarpStrike>();
 		grabAbility = GetComponent<AbilityGrab> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
@@ -92,14 +94,12 @@ public class PlayerController : MonoBehaviour {
 	public void UpdatePlayer() {
 		//Animator bools 
 		playerMoving = false;
-		//playerSprinting = false;
 		playerDashing = false;
 		playerAttacking = false;
 		playerSprintAttacking = false;
 
 		//Switch Design: Make each Ability class/state take in the playerState
 		//  and modify it only when that Ablity action is done executing
-		//abilitiesHandler.HandleTimers();
 
 		switch (playerState) {
 
@@ -158,6 +158,10 @@ public class PlayerController : MonoBehaviour {
 			flinchState.Flinch (ref playerState);
 			break;
 
+        case PlayerState.WarpStrike:
+            warpStrikeAbility.WarpStrike(ref playerState, basicMovement.GetAttackDirection());
+            break;
+
 		case PlayerState.HyperDashing:
 			//if (abilityHyperDash.hyperDashingActive)
 			////////attackDirection = GetMousePositionVector ();
@@ -184,35 +188,38 @@ public class PlayerController : MonoBehaviour {
 	//====================FOR SWITCHING INTO HURT STATE=========================
 
 	//Changes the current player state to default
-	private void CancelCurrentState() {
+    //returns true if state was successfully cancelled
+	private bool CancelCurrentState() {
 		switch (playerState) {
 		case PlayerState.Default:
 			//Stay in this state, so do nothing
 			basicMovement.ResetState (ref playerState);
-			break;
+            return true;
 		case PlayerState.Moving:
 			basicMovement.ResetState (ref playerState);
-			break;
+			return true;
 		case PlayerState.Attacking:
 			attackAbility.ResetState (ref playerState);
-			break;
+            return true;
 		case PlayerState.ChargedAttacking:
 			chargedAttackAbility.ResetState (ref playerState);
-			break;
+			return true;
 		case PlayerState.SprintAttacking:
 			sprintAttackAbility.ResetState (ref playerState);
-			break;
+			return true;
 		case PlayerState.Shielding:
 			shieldAbility.ResetState (ref playerState);
-			break;
+			return true;
 		case PlayerState.Flinch:
 			flinchState.ResetState (ref playerState);
-			break;
+			return true;
 		case PlayerState.Grabbing:
 			grabAbility.ResetState (ref playerState);
-			break;
+			return true;
 		//Add cases for grabbing and other states 
 		}
+
+        return false;
 	}
 
 	//pass in AttackType and an AttackInfoContainer
@@ -223,15 +230,15 @@ public class PlayerController : MonoBehaviour {
         //Deal Damage
         playerHealthComponent.TakeDamage(enemyAttack.damage);
 
-		CancelCurrentState ();
-
-		switch(enemyAttack.attackType) {
-		case AttackType.MeleeWeakAttack:
-			playerState = PlayerState.Flinch;
-			break;
-		case AttackType.MeleeStrongAttack:
-			//playerState = PlayerState.KnockBackAir;
-			break;
+        //If state was cancelled, make player flinch
+		if ( CancelCurrentState () )
+		    switch(enemyAttack.attackType) {
+		    case AttackType.MeleeWeakAttack:
+			    playerState = PlayerState.Flinch;
+			    break;
+		    case AttackType.MeleeStrongAttack:
+			    //playerState = PlayerState.KnockBackAir;
+			    break;
 		}
 	}
 	
@@ -261,8 +268,8 @@ public enum PlayerState {
 	Shielding,
 	DodgeRolling,
 	Grabbing,
-	Flinch //Hurt from weak hit
-	//DashGrabbing
+	Flinch, //Hurt from weak hit
+	WarpStrike
 	//Hurt
 	//Knocked Back
 	//OnGroundFromKnockBack
