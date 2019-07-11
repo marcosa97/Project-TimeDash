@@ -59,7 +59,7 @@ public class AbilityWarpStrike : MonoBehaviour {
                 this.chargedAttack.ActivateCorrespondingCollider(warpDirection);
 
                 //Let the attack info container know what just happened
-                this.playerAttackInfo.UpdateAttackInfo(AttackID.NormalAttack,
+                this.playerAttackInfo.UpdateAttackInfo(AttackID.WarpStrike,
                     baseAttackForce, dir, damageAmount);
 
                 this.timer = this.warpDuration;

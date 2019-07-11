@@ -30,42 +30,45 @@ public class PlayerSPComponent : MonoBehaviour {
 	}
 	
 	public void IncrementSP(int amount) {
-        this.currentSP += amount;
+        int totalSP = this.currentSP + (this.currentBubbles * this.maxSP);
 
-        //If current SP is at max
-        if (this.currentSP >= this.maxSP) {
-            //If bubbles are full, keep SP bar full, else empty bar and a fill bubble
-            if (this.currentBubbles == this.maxBubbles) {
-                this.currentSP = this.maxSP;
-            } else {
-                FillSPBubbles();
+        totalSP += amount;
 
-                this.currentSP = this.currentSP % this.maxSP;
-            }
+        //Cap SP to total max
+        int maxSPPossible = (this.maxBubbles + 1) * this.maxSP;
+        if (totalSP > maxSPPossible) {
+            totalSP = maxSPPossible;
         }
 
+        
+        this.currentBubbles = totalSP / this.maxSP;
+        if (this.currentBubbles > this.maxBubbles) {
+            this.currentBubbles = this.maxBubbles;
+        }
+
+        //Special case: all bubbles are filled
+        if (this.currentBubbles != this.maxBubbles) {
+            this.currentSP = totalSP % this.maxSP;
+        } else {
+            this.currentSP = totalSP - (this.maxSP * this.maxBubbles);
+        }
+
+        //Update UI
         UpdateSPBar();
+        UpdateSPBubblesUI();
     }
 
     public void DecrementSP(int amount) {
-        this.currentSP -= amount;
+        int totalSP = this.currentSP + (this.currentBubbles * this.maxSP);
 
-        //If current SP falls below 0
-        if (this.currentSP <= 0) {
+        totalSP -= amount;
 
-            //Remove SP bubble if there's filled bubbles
-            if (this.currentBubbles > 0) {
-                RemoveSPBubbles();
+        this.currentBubbles = totalSP / this.maxSP;
+        this.currentSP = totalSP % this.maxSP;
 
-                //leftover SP in bar after removing bubbles
-                this.currentSP = this.maxSP - (-this.currentSP % this.maxSP);
-            } else {
-                //No filled bubbles means player ran out of all SP
-                this.currentSP = 0;
-            }
-        }
-
+        //Update UI
         UpdateSPBar();
+        UpdateSPBubblesUI();
     }
 
     //Checks if player has enough SP to perform move that requires @amount of SP
@@ -76,24 +79,6 @@ public class PlayerSPComponent : MonoBehaviour {
         } else {
             return false;
         }
-    }
-
-    private void FillSPBubbles() {
-        //Calculate how many bubbles to fill -> integer division floors
-        int numBubbles = this.currentSP / this.maxSP;
-
-        this.currentBubbles += numBubbles;
-        UpdateSPBubblesUI();
-    }
-
-    private void RemoveSPBubbles() {
-        //Calculate how many bubbles to remove
-        //Note: +1 because the "if" case in caller function
-        //Note: negate currentSP because it's already negative
-        int numBubbles = 1 + (-this.currentSP / this.maxSP);
-
-        this.currentBubbles -= numBubbles;
-        UpdateSPBubblesUI();
     }
 
     private void UpdateSPBubblesUI() {

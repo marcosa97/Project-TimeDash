@@ -52,8 +52,10 @@ public class SwordCollider : MonoBehaviour {
 				//  and send it to the other object to process	
 				other.SendMessage("ObjectHit", playerAttackInfo );
 
-                //Increase SP
-                SPManager.IncrementSP(SPValues.NormalAttackSPGain);
+                //Increase SP for normal and charged attacks
+                if (playerAttackInfo.AttackID != AttackID.WarpStrike) {
+                    SPManager.IncrementSP(SPValues.NormalAttackSPGain);
+                }
 
 				//Call Time.Timescale using SendMessage or a reference to time manager
 				timeManager.StartCoroutine("HitStop");

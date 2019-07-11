@@ -45,7 +45,6 @@ public enum AttackType {
 	Null,
 	MeleeWeakAttack,
 	MeleeStrongAttack
-	//Arrow
 	//Stun
 	//etc
 }
@@ -54,6 +53,7 @@ public enum AttackID {
 	Null,
 	NormalAttack,
 	ChargedAttack,
+    WarpStrike,
 	SprintAttack,
 	Grab
 }

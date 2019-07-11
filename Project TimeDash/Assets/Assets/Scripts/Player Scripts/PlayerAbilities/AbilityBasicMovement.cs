@@ -21,6 +21,8 @@ public class AbilityBasicMovement : MonoBehaviour {
 	private Vector2 attackDirection; //used when an attack happens
 	private EightDirections playerOrientation; //the way the player is facing
 	private OrientationSystem orientationSystem;
+    private PlayerSPComponent SPHandler;
+    private PlayerSPValues SPValues;
 	public bool playerMoving;
 	private bool playerSprinting;
 
@@ -28,6 +30,8 @@ public class AbilityBasicMovement : MonoBehaviour {
 	void Start () {
 		playerBody = GetComponent<Rigidbody2D> ();
 		orientationSystem = GetComponent<OrientationSystem> ();
+        SPHandler = GetComponent<PlayerSPComponent> ();
+        SPValues = new PlayerSPValues();
 	}
 
 	public void Idle(ref PlayerState playerState) {
@@ -193,9 +197,16 @@ public class AbilityBasicMovement : MonoBehaviour {
 		} else if (Input.GetButtonDown ("GrabPS4")) {
 			playerState = PlayerState.Grabbing;
 		} else if (Input.GetButtonDown ("TrianglePS4")) {
-            attackDirection = new Vector2(lastMove.x, lastMove.y);
-            attackDirection.Normalize();
-            playerState = PlayerState.WarpStrike;
+
+            //Check if enough SP
+            if (SPHandler.HasEnoughSP(SPValues.WarpStrikeSPCost)) {
+                SPHandler.DecrementSP(SPValues.WarpStrikeSPCost);
+
+                attackDirection = new Vector2(lastMove.x, lastMove.y);
+                attackDirection.Normalize();
+                playerState = PlayerState.WarpStrike;
+            }
+            
 		}
 		//Handle Sonic Attack (V or LEFT SHIFT button)
 	}
