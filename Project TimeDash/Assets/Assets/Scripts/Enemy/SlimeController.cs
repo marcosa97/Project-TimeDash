@@ -21,6 +21,7 @@ public class SlimeController : MonoBehaviour {
     private Animator anim;
     private Rigidbody2D rb;
     private Vector2 lastMove;
+    [SerializeField]
     private EnemyState state;
     private FourDirectionSystem dirHandler;
 
