@@ -167,7 +167,7 @@ public class AbilityBasicMovement : MonoBehaviour {
 		}
 		*/
 		//Switch to Attack State
-		if (Input.GetButtonDown ("AttackPS4") ) {
+		if (Input.GetButtonDown ("AttackPS4") || Input.GetButtonDown("Attack") ) {
 			//Attack in direction player is facing
 			//NOTE: Multiplied by 10 so that the player moves far enough when attacking
 			lastMove.Normalize ();

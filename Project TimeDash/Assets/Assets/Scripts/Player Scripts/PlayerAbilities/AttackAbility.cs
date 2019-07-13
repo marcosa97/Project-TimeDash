@@ -100,7 +100,7 @@ public class AttackAbility : MonoBehaviour {
 
                 //Set up to check if charged attack will be performed
                 //Charge attack happens if attack button is held down while performing attack
-                if (Input.GetButtonUp("AttackPS4")) {
+                if (Input.GetButtonUp("AttackPS4") || Input.GetButtonUp("Attack")) {
                     this.chargeAttack = false;
                 } else {
                     this.chargeAttack = true;
@@ -121,12 +121,13 @@ public class AttackAbility : MonoBehaviour {
                 //This state is when the sword is swinging in the animation
                 timer -= Time.deltaTime;
 
-                if ( Input.GetButtonUp("AttackPS4") ) {
+                if ( Input.GetButtonUp("AttackPS4") || Input.GetButtonUp("Attack") ) {
                     this.chargeAttack = false;
                 }
 
                 //Check if user inputted attack while an attack is still happening (in buffer time window)
-                if ( !(timer <= 0f) && Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) {
+                if ( !(timer <= 0f) && (Input.GetButtonDown("AttackPS4") || Input.GetButtonDown("Attack"))
+                    && (comboCount != comboMax)) {
                     bufferInput = true;
                 }
 
@@ -144,7 +145,7 @@ public class AttackAbility : MonoBehaviour {
                 timer -= Time.deltaTime;
 
                 //Check for charged attack
-                if ( Input.GetButtonUp("AttackPS4") || comboCount == comboMax) {
+                if ( Input.GetButtonUp("AttackPS4") || Input.GetButtonUp("Attack") || comboCount == comboMax) {
                     this.chargeAttack = false;
                 }
 
@@ -152,7 +153,8 @@ public class AttackAbility : MonoBehaviour {
                 //  Moving
                 //  Attack -> Combo
                 //If input is received within cooldown period (except when combo max reached), change states. 
-                if ( (Input.GetButtonDown("AttackPS4") && (comboCount != comboMax)) || bufferInput) {
+                if ( ( (Input.GetButtonDown("AttackPS4") || Input.GetButtonDown("Attack") )
+                    && (comboCount != comboMax)) || bufferInput) {
                     //Go to next attack -> Maybe create switch case here to assign different animations or attack times
                     Debug.Log("Buffered Input");
                     attackState = AttackState.Ready;

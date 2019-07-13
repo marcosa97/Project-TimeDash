@@ -45,6 +45,7 @@ public class SlimeController : MonoBehaviour {
         this.healthComponent = GetComponent<HealthComponent>();
         this.state = EnemyState.Pursuit;
         this.dirHandler = new FourDirectionSystem();
+        //this.gameObject.SetActive(false);
 	}
 
 
@@ -181,6 +182,11 @@ public class SlimeController : MonoBehaviour {
         */
         //this.rb.velocity = Vector2.zero;
         this.rb.AddForce(obj.direction * obj.force);
+    }
+
+    public void Activate()
+    {
+        this.gameObject.SetActive(true);
     }
 
     //For debugging

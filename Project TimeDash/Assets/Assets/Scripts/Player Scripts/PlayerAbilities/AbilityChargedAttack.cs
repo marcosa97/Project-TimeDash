@@ -151,7 +151,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 			spriteRenderer.material.SetFloat("_FlashAmount", Mathf.PingPong(timer * 4.7f, 0.60f) );
 
 			//If timer is up or player releases button, then perform attack
-			if (timer <= 0f || (Input.GetButtonUp ("AttackPS4")) ) {
+			if (timer <= 0f || (Input.GetButtonUp ("AttackPS4")) || Input.GetButtonUp("Attack") ) {
 				spriteRenderer.material.SetFloat ("_FlashAmount", 0f);
 				chargeAttackState = ChargeAttackState.Attacking;
 				ActivateCorrespondingCollider (playerFaceDirection); 
@@ -161,7 +161,7 @@ public class AbilityChargedAttack : MonoBehaviour {
 			}
 
 			//If button is still being held down
-			if (Input.GetButton ("AttackPS4")) {
+			if (Input.GetButton ("AttackPS4") || Input.GetButton("Attack") ) {
 				//Increase damage that will be dealt here
 				finalAttackForce += (Time.deltaTime * chargeMultiplier);
 				break;
