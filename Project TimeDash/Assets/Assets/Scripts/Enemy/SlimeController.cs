@@ -43,7 +43,7 @@ public class SlimeController : MonoBehaviour {
         this.rb = GetComponent<Rigidbody2D>();
         this.anim = GetComponent<Animator>();
         this.healthComponent = GetComponent<HealthComponent>();
-        this.state = EnemyState.Pursuit;
+        this.state = EnemyState.Idle;
         this.dirHandler = new FourDirectionSystem();
         //this.gameObject.SetActive(false);
 	}

@@ -8,14 +8,14 @@ public class RoomHandler : MonoBehaviour {
     public List<GameObject> enemies;
 
     private RoomsDeactivator roomsDeactivator;
-    private BoxCollider2D roomChecker;
     private SpriteMask roomMask;
+    private bool insideRoom;
 
 	void Start () {
         this.roomsDeactivator = GetComponentInParent<RoomsDeactivator>();
-        this.roomChecker = GetComponent<BoxCollider2D>();
         this.roomMask = GetComponent<SpriteMask>();
         this.roomMask.enabled = false;
+        this.insideRoom = false;
 
         //Activate enemies
         foreach (GameObject i in this.enemies)
@@ -25,7 +25,15 @@ public class RoomHandler : MonoBehaviour {
     }
 
     public void ActivateRoom() {
+
+        if (insideRoom == true) {
+            return;
+        }
+
+        this.roomsDeactivator.DeactivateAllRooms();
+
         this.roomMask.enabled = true;
+        this.insideRoom = true;
 
         //Activate enemies
         foreach(GameObject i in this.enemies) {
@@ -37,6 +45,7 @@ public class RoomHandler : MonoBehaviour {
 
     public void DeactivateRoom() {
         this.roomMask.enabled = false;
+        this.insideRoom = false;
 
         //Deactivate enemies
         foreach(GameObject i in this.enemies) {
@@ -46,15 +55,17 @@ public class RoomHandler : MonoBehaviour {
         }
     }
 
+    /*
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Player") {
             Debug.Log("Entered Room");
 
-            //Deactivate other rooms
-            this.roomsDeactivator.DeactivateAllRooms();
+            ActivateRoom();
 
-            ActivateRoom();   
+            //Play cutscene
+            //this.timelineController.Play();
         }
     }
+    */
 }
