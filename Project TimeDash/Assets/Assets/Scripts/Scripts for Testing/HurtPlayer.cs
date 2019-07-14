@@ -19,9 +19,12 @@ public class HurtPlayer : MonoBehaviour {
 		if ( Input.GetKeyDown (KeyCode.Space)) {
 			Debug.Log ("CANCEL CALLED");
 
+            /*
 			attackInfo.attackType = AttackType.MeleeWeakAttack;
 			playerController.HurtPlayer (attackInfo);
-			//playerController.gameObject.GetComponent<Rigidbody2D> ().
+            */
+
+            playerController.MakePlayerFall();
 		}
 	}
 }

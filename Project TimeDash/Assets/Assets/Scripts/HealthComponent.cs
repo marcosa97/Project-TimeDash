@@ -11,6 +11,7 @@ public class HealthComponent : MonoBehaviour
     private int currentHealth;
 
     public Image healthBar;
+    private RoomHandler roomHandler;
     /*
 	public bool canRegen; //can turn regen on or off
 	public int regenAmount; //amount to heal per regen tick
@@ -27,6 +28,7 @@ public class HealthComponent : MonoBehaviour
                                   if (canRegen) {
                                       InvokeRepeating ("Regen", regenTime, regenTime);
                                   } */
+        this.roomHandler = GetComponentInParent<RoomHandler>();
     }
 
     public void TakeDamage(int amount)
@@ -59,6 +61,9 @@ public class HealthComponent : MonoBehaviour
         Debug.Log("Dead");
 
         //Add screen shake
+
+        //Update room info
+        this.roomHandler.DecrementNumEnemies();
 
         Destroy(this.gameObject);
     }

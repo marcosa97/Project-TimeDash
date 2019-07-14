@@ -1,26 +1,51 @@
-﻿using System.Collections;
+﻿
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomHandler : MonoBehaviour {
 
+    public enum DoorType {
+        EnemyLocked,
+        KeyLocked
+    }
+
     //List of enemies inside room
     public List<GameObject> enemies;
+    public DoorType doorType;
 
+    private DoorOpener doorOpener;
     private RoomsDeactivator roomsDeactivator;
     private SpriteMask roomMask;
     private bool insideRoom;
+    [SerializeField]
+    private int numEnemies;
 
 	void Start () {
+        this.doorOpener = GetComponent<DoorOpener>();
         this.roomsDeactivator = GetComponentInParent<RoomsDeactivator>();
         this.roomMask = GetComponent<SpriteMask>();
         this.roomMask.enabled = false;
         this.insideRoom = false;
+        this.numEnemies = 0;
 
         //Activate enemies
         foreach (GameObject i in this.enemies)
         {
             i.gameObject.SetActive(false);
+            this.numEnemies++;
+        }
+    }
+
+    public void DecrementNumEnemies() {
+        this.numEnemies--;
+
+        if (this.numEnemies == 0) {
+            //Open locked bar door if there is one
+            if (this.doorOpener != null && this.doorType == DoorType.EnemyLocked) {
+                this.doorOpener.RemoveDoorTile();
+            }
+
+            Debug.Log("Killed all enemies in room");
         }
     }
 
@@ -30,7 +55,9 @@ public class RoomHandler : MonoBehaviour {
             return;
         }
 
-        this.roomsDeactivator.DeactivateAllRooms();
+        if (this.roomsDeactivator != null) {
+            this.roomsDeactivator.DeactivateAllRooms();
+        }
 
         this.roomMask.enabled = true;
         this.insideRoom = true;
@@ -54,18 +81,4 @@ public class RoomHandler : MonoBehaviour {
             }
         }
     }
-
-    /*
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.tag == "Player") {
-            Debug.Log("Entered Room");
-
-            ActivateRoom();
-
-            //Play cutscene
-            //this.timelineController.Play();
-        }
-    }
-    */
 }

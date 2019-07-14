@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour {
     private AbilityWarpStrike warpStrikeAbility;
 	private AbilityGrab grabAbility;
 	private PlayerStateFlinch flinchState;
+    private AbilityFall fallState;
 	private HurtInfoReceiver hurtInfo;
     private PlayerHealthComponent playerHealthComponent;
 	//public AbilityHyperDash abilityHyperDash;
@@ -51,6 +52,7 @@ public class PlayerController : MonoBehaviour {
         warpStrikeAbility = GetComponent<AbilityWarpStrike>();
 		grabAbility = GetComponent<AbilityGrab> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
+        fallState = GetComponent<AbilityFall> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
         playerHealthComponent = GetComponent<PlayerHealthComponent>();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
@@ -105,7 +107,6 @@ public class PlayerController : MonoBehaviour {
 
 		/*
 		case PlayerState.Default:
-			//A function should go here that checks whether a certain state is available?
 			if (controllerPref == ControllerPreference.KeyboardMouse)
 				GetKeyboardInput ();
 			else
@@ -157,6 +158,10 @@ public class PlayerController : MonoBehaviour {
 		case PlayerState.Flinch:
 			flinchState.Flinch (ref playerState);
 			break;
+
+        case PlayerState.Falling:
+            fallState.Fall(ref playerState);
+            break;
 
         case PlayerState.WarpStrike:
             warpStrikeAbility.WarpStrike(ref playerState, basicMovement.GetAttackDirection());
@@ -241,6 +246,13 @@ public class PlayerController : MonoBehaviour {
 			    break;
 		}
 	}
+
+    public void MakePlayerFall() {
+        //Cancel state
+        CancelCurrentState();
+
+        playerState = PlayerState.Falling;
+    }
 	
 	//Ignores sword collider
 	// @other: the player
@@ -269,14 +281,10 @@ public enum PlayerState {
 	DodgeRolling,
 	Grabbing,
 	Flinch, //Hurt from weak hit
-	WarpStrike
-	//Hurt
+	WarpStrike,
+    Falling
 	//Knocked Back
-	//OnGroundFromKnockBack
 	//Interacting with Object
-	//Talking with NPC
-	//Climbing
-	//Jumping
 	//Cutscene
 }
 
