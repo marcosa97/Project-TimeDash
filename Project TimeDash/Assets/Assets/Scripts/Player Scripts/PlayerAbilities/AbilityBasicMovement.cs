@@ -192,11 +192,12 @@ public class AbilityBasicMovement : MonoBehaviour {
 			playerState = PlayerState.Shielding;
 		}
 		//Handle input for Hyper Dash -> Right mouse click
-		else if (Input.GetMouseButtonDown (1)) {
-			playerState = PlayerState.HyperDashing;
-		} else if (Input.GetButtonDown ("GrabPS4")) {
+		//else if (Input.GetMouseButtonDown (1)) {
+		//	playerState = PlayerState.HyperDashing;
+		//} 
+        else if (Input.GetButtonDown ("GrabPS4")) {
 			playerState = PlayerState.Grabbing;
-		} else if (Input.GetButtonDown ("TrianglePS4")) {
+		} else if (Input.GetButtonDown ("TrianglePS4") || Input.GetMouseButtonDown(1) ) {
 
             //Check if enough SP
             if (SPHandler.HasEnoughSP(SPValues.WarpStrikeSPCost)) {

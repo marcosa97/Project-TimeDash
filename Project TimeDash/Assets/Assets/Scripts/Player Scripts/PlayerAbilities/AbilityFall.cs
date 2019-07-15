@@ -13,12 +13,17 @@ public class AbilityFall : MonoBehaviour {
     private PlayerHealthComponent healthComponent;
     private Animator playerAnimator;
     private FallState fallState;
+    private Vector2 activeRespawnPoint;
 
 	void Start () {
         this.healthComponent = GetComponent<PlayerHealthComponent>();
         this.playerAnimator = GetComponent<Animator>();
         this.fallState = FallState.Setup;
 	}
+
+    public void SetActiveRespawnPoint(Vector2 newPoint) {
+        this.activeRespawnPoint = newPoint;
+    }
 	
 	public void Fall(ref PlayerState playerState) {
         switch(this.fallState) {
@@ -34,6 +39,11 @@ public class AbilityFall : MonoBehaviour {
                 playerState = PlayerState.Default;
                 this.fallState = FallState.Setup;
                 this.healthComponent.TakeDamage(this.FallDamageAmount);
+
+                //Move player position to respawn point
+                this.gameObject.transform.position = this.activeRespawnPoint;
+
+                //Make player sprite blink
                 break;
         }
     }

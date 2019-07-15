@@ -36,8 +36,7 @@ public class PlayerController : MonoBehaviour {
     private AbilityFall fallState;
 	private HurtInfoReceiver hurtInfo;
     private PlayerHealthComponent playerHealthComponent;
-	//public AbilityHyperDash abilityHyperDash;
-
+    //public AbilityHyperDash abilityHyperDash;
 
 	// Use this for initialization
 	void Start () {
