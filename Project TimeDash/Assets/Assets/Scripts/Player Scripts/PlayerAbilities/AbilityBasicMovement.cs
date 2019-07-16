@@ -19,15 +19,18 @@ public class AbilityBasicMovement : MonoBehaviour {
 
 	private Vector2 lastMove;
 	private Vector2 attackDirection; //used when an attack happens
+    private FourDirectionSystem DirectionSystem;
 	private EightDirections playerOrientation; //the way the player is facing
 	private OrientationSystem orientationSystem;
     private PlayerSPComponent SPHandler;
     private PlayerSPValues SPValues;
 	public bool playerMoving;
 	private bool playerSprinting;
+    public LayerMask whatToHit;
 
 	// Use this for initialization
 	void Start () {
+        this.DirectionSystem = new FourDirectionSystem();
 		playerBody = GetComponent<Rigidbody2D> ();
 		orientationSystem = GetComponent<OrientationSystem> ();
         SPHandler = GetComponent<PlayerSPComponent> ();
@@ -155,7 +158,7 @@ public class AbilityBasicMovement : MonoBehaviour {
 	//FOR PS4 CONTROLLER
 	//Handles all inputs other than player movement
 	private void GetControllerInput(ref PlayerState playerState) {
-		/*
+        /*
 		//If player pressed Dash button and player is moving
 		if (Input.GetKeyDown (KeyCode.Space) && (!playerBody.velocity.Equals (Vector2.zero))) {
 			//If cool down is done, allow dashing again
@@ -166,38 +169,38 @@ public class AbilityBasicMovement : MonoBehaviour {
 				playerState = PlayerState.Default;
 		}
 		*/
-		//Switch to Attack State
-		if (Input.GetButtonDown ("AttackPS4") || Input.GetButtonDown("Attack") ) {
-			//Attack in direction player is facing
-			//NOTE: Multiplied by 10 so that the player moves far enough when attacking
-			lastMove.Normalize ();
+        //Switch to Attack State
+        if (Input.GetButtonDown("AttackPS4") || Input.GetButtonDown("Attack")) {
+            //Attack in direction player is facing
+            //NOTE: Multiplied by 10 so that the player moves far enough when attacking
+            lastMove.Normalize();
             //Change attack distance depending on which move is executed
             attackDirection = new Vector2(lastMove.x, lastMove.y);
 
-			if (!playerSprinting) {
-				//attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
-				//	transform.position.y + lastMove.y * 10f);
+            if (!playerSprinting) {
+                //attackDirection = new Vector3 (transform.position.x + lastMove.x * 10f, 
+                //	transform.position.y + lastMove.y * 10f);
 
-				playerState = PlayerState.Attacking;
-			} else {
-				attackDirection = new Vector3 (transform.position.x + lastMove.x,
-					transform.position.y + lastMove.y);
+                playerState = PlayerState.Attacking;
+            } else {
+                attackDirection = new Vector3(transform.position.x + lastMove.x,
+                    transform.position.y + lastMove.y);
 
-				playerState = PlayerState.SprintAttacking;
-			}
-				
-		}
-		//Handle shielding 
-		else if (Input.GetButton ("ShieldPS4")) {
-			playerState = PlayerState.Shielding;
-		}
-		//Handle input for Hyper Dash -> Right mouse click
-		//else if (Input.GetMouseButtonDown (1)) {
-		//	playerState = PlayerState.HyperDashing;
-		//} 
-        else if (Input.GetButtonDown ("GrabPS4")) {
-			playerState = PlayerState.Grabbing;
-		} else if (Input.GetButtonDown ("TrianglePS4") || Input.GetMouseButtonDown(1) ) {
+                playerState = PlayerState.SprintAttacking;
+            }
+
+        }
+        //Handle shielding 
+        else if (Input.GetButton("ShieldPS4")) {
+            playerState = PlayerState.Shielding;
+        }
+        //Handle input for Hyper Dash -> Right mouse click
+        //else if (Input.GetMouseButtonDown (1)) {
+        //	playerState = PlayerState.HyperDashing;
+        //} 
+        else if (Input.GetButtonDown("GrabPS4")) {
+            playerState = PlayerState.Grabbing;
+        } else if (Input.GetButtonDown("TrianglePS4") || Input.GetMouseButtonDown(1)) {
 
             //Check if enough SP
             if (SPHandler.HasEnoughSP(SPValues.WarpStrikeSPCost)) {
@@ -207,9 +210,16 @@ public class AbilityBasicMovement : MonoBehaviour {
                 attackDirection.Normalize();
                 playerState = PlayerState.WarpStrike;
             }
+
+        } else if (Input.GetButtonDown("Interact")) {
+            //Check if there's an interactable object
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, 1, this.whatToHit);
             
-		}
-		//Handle Sonic Attack (V or LEFT SHIFT button)
+            if (hit.collider != null && hit.collider.tag == "InteractableStaticObject") {
+                Debug.Log("Going into interact state");
+                playerState = PlayerState.Interacting;
+            }
+        }
 	}
 
 	/*
@@ -250,6 +260,10 @@ public class AbilityBasicMovement : MonoBehaviour {
 	public Vector2 GetLastMove() {
 		return lastMove;
 	}
+
+    public FourDirections GetFaceDirectionIn4DirSystem() {
+        return DirectionSystem.GetDirectionFromVector(this.lastMove);
+    }
 
 	public EightDirections GetFaceDirection() {
 		return playerOrientation;

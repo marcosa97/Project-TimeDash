@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour {
 	private AbilityGrab grabAbility;
 	private PlayerStateFlinch flinchState;
     private AbilityFall fallState;
+    private AbilityInteract interactState;
 	private HurtInfoReceiver hurtInfo;
     private PlayerHealthComponent playerHealthComponent;
     //public AbilityHyperDash abilityHyperDash;
@@ -52,6 +53,7 @@ public class PlayerController : MonoBehaviour {
 		grabAbility = GetComponent<AbilityGrab> ();
 		flinchState = GetComponent<PlayerStateFlinch> ();
         fallState = GetComponent<AbilityFall> ();
+        interactState = GetComponent<AbilityInteract> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
         playerHealthComponent = GetComponent<PlayerHealthComponent>();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
@@ -160,6 +162,10 @@ public class PlayerController : MonoBehaviour {
 
         case PlayerState.Falling:
             fallState.Fall(ref playerState);
+            break;
+
+        case PlayerState.Interacting:
+            interactState.Interact(ref playerState);
             break;
 
         case PlayerState.WarpStrike:
@@ -281,9 +287,9 @@ public enum PlayerState {
 	Grabbing,
 	Flinch, //Hurt from weak hit
 	WarpStrike,
-    Falling
+    Falling,
+    Interacting
 	//Knocked Back
-	//Interacting with Object
 	//Cutscene
 }
 
