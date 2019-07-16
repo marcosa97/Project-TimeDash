@@ -28,6 +28,20 @@ public class FourDirectionSystem {
         return FourDirections.South;
     }
 
+    public Vector2 GetVectorFromDirection(FourDirections dir) {
+        if ( dir == FourDirections.North) {
+            return Vector2.up;
+        } else if (dir == FourDirections.East) {
+            return Vector2.right;
+        } else if (dir == FourDirections.South) {
+            return Vector2.down;
+        } else if (dir == FourDirections.West) {
+            return Vector2.left;
+        }
+
+        return Vector2.up;
+    }
+
 }
 
 public enum FourDirections

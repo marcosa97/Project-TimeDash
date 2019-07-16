@@ -212,13 +212,7 @@ public class AbilityBasicMovement : MonoBehaviour {
             }
 
         } else if (Input.GetButtonDown("Interact")) {
-            //Check if there's an interactable object
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, 1, this.whatToHit);
-            
-            if (hit.collider != null && hit.collider.tag == "InteractableStaticObject") {
-                Debug.Log("Going into interact state");
-                playerState = PlayerState.Interacting;
-            }
+            playerState = PlayerState.Interacting;
         }
 	}
 
