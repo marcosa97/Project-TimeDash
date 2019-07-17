@@ -4,7 +4,6 @@ public class AbilityInteract : MonoBehaviour {
 
     private enum InteractState {
         Check,
-        InteractChest,
         Done
     }
 
@@ -16,16 +15,26 @@ public class AbilityInteract : MonoBehaviour {
     private Animator animator;
     private AbilityBasicMovement playerMovementSystem;
     private FourDirectionSystem DirectionSystem;
+    private AbilityDialogue playerDialogueState;
     public SpriteRenderer holdItem;
     public LayerMask whatToHit;
+
+    private PlayerHealthComponent HPHandler;
+    private PlayerSPComponent SPHandler;
+    private PlayerKeyInventory KeyInventory;
 
 	// Use this for initialization
 	void Start () {
         this.state = InteractState.Check;
         this.animator = GetComponent<Animator>();
         this.playerMovementSystem = GetComponent<AbilityBasicMovement>();
+        this.playerDialogueState = GameObject.Find("Player").GetComponent<AbilityDialogue>();
         this.DirectionSystem = new FourDirectionSystem();
         this.holdItem.enabled = false;
+
+        this.HPHandler = GetComponent<PlayerHealthComponent>();
+        this.SPHandler = GetComponent<PlayerSPComponent>();
+        this.KeyInventory = GetComponent<PlayerKeyInventory>();
 	}
 
     //Animation event
@@ -38,28 +47,37 @@ public class AbilityInteract : MonoBehaviour {
         this.holdItem.enabled = false;
     }
 
-    private void HandleChestInteractable(InteractableObject interactable) {
+    private void HandleChestInteractable(InteractableObject interactable, ref PlayerState playerState) {
         Debug.Log("Interacted With Chest");
         interactable.DeactivateInteractable();
 
         //Play animation
         this.animator.Play("gotItem");
 
+        var PotionValues = ScriptableObject.CreateInstance<PlayerSPValues>();
+
         //Increase key count, hp, or sp 
         switch (interactable.chestReward) {
             case InteractableObject.ChestReward.HPPotion:
                 this.holdItem.sprite = hpPotionSprite;
+                this.HPHandler.Heal(PotionValues.HPPotionGain);  
                 break;
             case InteractableObject.ChestReward.SPPotion:
                 this.holdItem.sprite = spPotionSprite;
+                this.SPHandler.IncrementSP(PotionValues.SPPotionGain);
                 break;
             case InteractableObject.ChestReward.Key:
                 this.holdItem.sprite = keySprite;
+                this.KeyInventory.IncrementKeyCount();
                 break;
         }
 
+        //If first time getting an HP Potion, activate dialogue
+        this.playerDialogueState.Setup(playerState, interactable);
+
         //Go into dialogue state
-        this.state = InteractState.InteractChest;
+        playerState = PlayerState.Dialogue;
+        this.state = InteractState.Done;
     }
 
     public void Interact(ref PlayerState playerState) {
@@ -91,7 +109,7 @@ public class AbilityInteract : MonoBehaviour {
                 switch (interactable.objectType)
                 {
                     case InteractableObject.InteractableType.Chest:
-                        HandleChestInteractable(interactable);
+                        HandleChestInteractable(interactable, ref playerState);
                         break;
 
                     case InteractableObject.InteractableType.Door:
@@ -100,14 +118,6 @@ public class AbilityInteract : MonoBehaviour {
                     case InteractableObject.InteractableType.Lever:
                         break;
                 }
-
-                break;
-
-            case InteractState.InteractChest:
-                //Play interact animation
-
-                //Go into dialogue mode -> The whole scene is paused when this happens
-                //this.state = InteractState.Done;
 
                 break;
 

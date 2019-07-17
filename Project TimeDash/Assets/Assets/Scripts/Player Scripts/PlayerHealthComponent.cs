@@ -37,6 +37,15 @@ public class PlayerHealthComponent : MonoBehaviour
         minXValue = healthTransform.position.x - healthTransform.rect.width;
     }
 
+    public void Heal(int amount) {
+        currentHealth += amount;
+        if (currentHealth > maxHealth) {
+            currentHealth = maxHealth;
+        }
+
+        UpdateHealth();
+    }
+
     public void TakeDamage(int amount)
     {
         //Cancel regeneration if hit

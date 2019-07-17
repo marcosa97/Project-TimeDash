@@ -16,6 +16,10 @@ public class InteractableObject : MonoBehaviour {
         NotApplicable
     }
 
+    public Dialogue GotHPPotion;
+    public Dialogue GotSPPotion;
+    public Dialogue GotKey;
+
     //Object's direction relative to the player
     public FourDirections objectDirection;
     public InteractableType objectType;
@@ -34,6 +38,29 @@ public class InteractableObject : MonoBehaviour {
         this.PromptUI.SetActive(false);
         this.isActive = true;
 	}
+
+    public Dialogue GetCorrespondingDialogue()
+    {
+        Dialogue dialogue = null;
+
+        switch(this.objectType) {
+            case InteractableType.Chest:
+                if (this.chestReward == ChestReward.HPPotion) {
+                    dialogue = GotHPPotion;
+                } else if (this.chestReward == ChestReward.SPPotion) {
+                    dialogue = GotSPPotion;
+                } else if (this.chestReward == ChestReward.Key) {
+                    dialogue = GotKey;
+                }
+                break;
+            case InteractableType.Door:
+                break;
+            case InteractableType.Lever:
+                break;
+        }
+
+        return dialogue;
+    }
 
     public bool IsActive() {
         return this.isActive;

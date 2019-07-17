@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 //This class controls the player's state machine. Contains and manages all the ability scripts
 public class PlayerController : MonoBehaviour {
@@ -35,6 +33,7 @@ public class PlayerController : MonoBehaviour {
 	private PlayerStateFlinch flinchState;
     private AbilityFall fallState;
     private AbilityInteract interactState;
+    private AbilityDialogue dialogueState;
 	private HurtInfoReceiver hurtInfo;
     private PlayerHealthComponent playerHealthComponent;
     //public AbilityHyperDash abilityHyperDash;
@@ -54,6 +53,7 @@ public class PlayerController : MonoBehaviour {
 		flinchState = GetComponent<PlayerStateFlinch> ();
         fallState = GetComponent<AbilityFall> ();
         interactState = GetComponent<AbilityInteract> ();
+        dialogueState = GetComponent<AbilityDialogue> ();
 		hurtInfo = GetComponent<HurtInfoReceiver> ();
         playerHealthComponent = GetComponent<PlayerHealthComponent>();
 		//abilityHyperDash = GetComponent<AbilityHyperDash> ();
@@ -166,6 +166,10 @@ public class PlayerController : MonoBehaviour {
 
         case PlayerState.Interacting:
             interactState.Interact(ref playerState);
+            break;
+
+        case PlayerState.Dialogue:
+            dialogueState.Dialogue(ref playerState);
             break;
 
         case PlayerState.WarpStrike:
@@ -288,7 +292,8 @@ public enum PlayerState {
 	Flinch, //Hurt from weak hit
 	WarpStrike,
     Falling,
-    Interacting
+    Interacting,
+    Dialogue
 	//Knocked Back
 	//Cutscene
 }
