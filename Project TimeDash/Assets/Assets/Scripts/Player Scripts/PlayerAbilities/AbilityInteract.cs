@@ -80,6 +80,21 @@ public class AbilityInteract : MonoBehaviour {
         this.state = InteractState.Done;
     }
 
+    private void HandleDoorInteractable(InteractableObject interactable, ref PlayerState playerState) {
+        
+
+        if (this.KeyInventory.GetKeyCount() > 0) {
+            interactable.DeactivateInteractable();
+            this.KeyInventory.DecrementKeyCount();
+        } else {
+            this.playerDialogueState.Setup(playerState, interactable);
+            playerState = PlayerState.Dialogue;
+        }
+
+        
+        this.state = InteractState.Done;
+    }
+
     public void Interact(ref PlayerState playerState) {
         switch(state) {
             case InteractState.Check:
@@ -113,6 +128,7 @@ public class AbilityInteract : MonoBehaviour {
                         break;
 
                     case InteractableObject.InteractableType.Door:
+                        HandleDoorInteractable(interactable, ref playerState);
                         break;
 
                     case InteractableObject.InteractableType.Lever:

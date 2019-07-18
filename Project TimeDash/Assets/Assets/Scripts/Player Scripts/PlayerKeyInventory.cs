@@ -12,6 +12,10 @@ public class PlayerKeyInventory : MonoBehaviour {
         this.count.text = keyCount.ToString();
 	}
 
+    public int GetKeyCount() {
+        return this.keyCount;
+    }
+
     public void IncrementKeyCount() {
         this.keyCount++;
         this.count.text = keyCount.ToString();
