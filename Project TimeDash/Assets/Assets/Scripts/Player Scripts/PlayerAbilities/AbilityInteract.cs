@@ -88,6 +88,7 @@ public class AbilityInteract : MonoBehaviour {
             this.KeyInventory.DecrementKeyCount();
         } else {
             this.playerDialogueState.Setup(playerState, interactable);
+            this.animator.Play("Idle Direction");
             playerState = PlayerState.Dialogue;
         }
 
@@ -98,6 +99,12 @@ public class AbilityInteract : MonoBehaviour {
     public void Interact(ref PlayerState playerState) {
         switch(state) {
             case InteractState.Check:
+                //Only interact if the prompt UI is active
+                if (GameObject.Find("PromptUI") == null) {
+                    playerState = PlayerState.Default;
+                    return;
+                }
+
                 //Determine direction to raycast
                 FourDirections dir = this.playerMovementSystem.GetFaceDirectionIn4DirSystem();
 
@@ -106,11 +113,12 @@ public class AbilityInteract : MonoBehaviour {
                     this.DirectionSystem.GetVectorFromDirection(dir), 1, this.whatToHit);
 
                 //If mistake, go back to default
-                if (hit.collider == null || hit.collider.tag != "InteractableStaticObject" 
+                //NOTE: Raycast will only hit objects on layer "InteractableObjects", which are the only ones with this tag
+                if (hit.collider == null || hit.collider.tag != "InteractableStaticObject"
                     || hit.collider.gameObject.GetComponent<InteractableObject>().IsActive() == false) {
-                    Debug.Log("No interactable object in range");
-                    playerState = PlayerState.Default;
-                    return;
+                            Debug.Log("No interactable object in range");
+                            playerState = PlayerState.Default;
+                            return;
                 }
 
                 //Determine which type of interactable we hit

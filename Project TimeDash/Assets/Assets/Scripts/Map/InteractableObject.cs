@@ -28,9 +28,9 @@ public class InteractableObject : MonoBehaviour {
     private AbilityBasicMovement playerMovementSystem;
     private SpriteRenderer spriteRenderer;
     private PlayerKeyInventory keyInventory;
-    private DoorOpener doorOpener;
     public GameObject PromptUI;
     public Text promptText;
+    [SerializeField]
     private bool isActive;
 
 	// Use this for initialization
@@ -38,7 +38,6 @@ public class InteractableObject : MonoBehaviour {
         GameObject player = GameObject.Find("Player");
         this.playerMovementSystem = player.GetComponent<AbilityBasicMovement>();
         this.keyInventory = player.GetComponent<PlayerKeyInventory>();
-        this.doorOpener = GetComponent<DoorOpener>();
         this.spriteRenderer = GetComponent<SpriteRenderer>();
         this.PromptUI.SetActive(false);
         this.isActive = true;
@@ -76,12 +75,15 @@ public class InteractableObject : MonoBehaviour {
     public void DeactivateInteractable() {
         this.isActive = false;
 
-        if (this.spriteRenderer != null) {
-            this.spriteRenderer.sprite = this.inactiveSprite;
-        }
-
-        if (this.doorOpener != null) {
-            this.doorOpener.RemoveDoorTile();
+        switch (this.objectType) {
+            case InteractableType.Chest:
+                if (this.spriteRenderer != null) {
+                    this.spriteRenderer.sprite = this.inactiveSprite;
+                }
+                break;
+            case InteractableType.Door:
+                Destroy(this.gameObject);
+                break;
         }
 
         this.PromptUI.SetActive(false);
