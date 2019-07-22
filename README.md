@@ -1,5 +1,8 @@
 # Project-TimeDash
 
+Current Progress:
+https://trello.com/b/ZnFHQIsI/project-time-dash
+
 State of game as of 2018 before overhaul:
 
 ![](prototype.gif)
