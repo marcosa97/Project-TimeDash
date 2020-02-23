@@ -3,11 +3,11 @@
 Current Progress:
 https://trello.com/b/ZnFHQIsI/project-time-dash
 
-State of game as of 2018 before overhaul:
+Prototype of game before the summer of 2019:
 
 ![](prototype.gif)
 
-## Summer 2019 overhaul:
+## Summer 2019:
 
 Premade art assets imported and implemented. Lots of 
 features were also removed, like the 8-directional system,
